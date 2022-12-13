@@ -145,20 +145,7 @@ int get_device_count() {
 #elif defined(KOKKOS_ENABLE_OPENMPTARGET)
   return omp_get_num_devices();
 #elif defined(KOKKOS_ENABLE_NEXTSILICON)
-  {
-    // clang-format off
-    // FIXME_NEXTSILICON: nsapi has this defined as extern C, but in the library
-    // the names are mangled, so linking fails
-    // https://nextsilicon.atlassian.net/servicedesk/customer/portal/3/CS-198
-    // this will be corrected in the 0.13.0 release
-    // nsapi_device *devs;
-    // int ndev = nsapi_device_get_all_devices(&devs);
-    // nsapi_device_free_all_devices(devs);
-    // don't care about device info yet 
-    // return ndev;
-    // clang-format on
-    return 1;
-  }
+  return Kokkos::Experimental::NextSilicon::detect_device_count();
 #else
   Kokkos::abort("implementation bug");
   return -1;

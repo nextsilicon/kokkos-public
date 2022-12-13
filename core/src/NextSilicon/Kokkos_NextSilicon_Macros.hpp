@@ -14,13 +14,10 @@
 //
 //@HEADER
 
-#ifndef KOKKOS_DECLARE_NEXTSILICON_HPP
-#define KOKKOS_DECLARE_NEXTSILICON_HPP
+#ifndef KOKKOS_NEXTSILICON_MACROS_HPP
+#define KOKKOS_NEXTSILICON_MACROS_HPP
 
-#if defined(KOKKOS_ENABLE_NEXTSILICON)
-#include <NextSilicon/Kokkos_NextSilicon.hpp>
-#include <NextSilicon/Kokkos_NextSilicon_ParallelFor_Range.hpp>
-#include <NextSilicon/Kokkos_NextSilicon_ParallelReduce_Range.hpp>
-#endif
+#define KOKKOS_IMPL_NS_PRAGMA_HELPER(x) _Pragma(#x)
+#define KOKKOS_IMPL_NS_PRAGMA(x) KOKKOS_IMPL_NS_PRAGMA_HELPER(x)
 
-#endif
+#endif  // KOKKOS_NEXTSILICON_MACROS_HPP
