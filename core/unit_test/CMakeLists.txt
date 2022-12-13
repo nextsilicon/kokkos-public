@@ -63,6 +63,9 @@ else()
   set(KOKKOS_OPENACC_FEATURE_LEVEL 17)
 endif()
 
+SET(KOKKOS_NEXTSILICON_FEATURE_LEVEL 3)
+SET(KOKKOS_NEXTSILICON_NAME Experimental::NextSilicon)
+
 set(KOKKOS_OPENACC_NAME Experimental::OpenACC)
 
 #
@@ -825,6 +828,15 @@ if(Kokkos_ENABLE_SYCL)
     )
   endif()
 endif()
+
+IF(KOKKOS_ENABLE_NEXTSILICON)
+  KOKKOS_ADD_EXECUTABLE_AND_TEST(
+    CoreUnitTest_NextSiliconNsapi
+    SOURCES
+    UnitTestMainInit.cpp
+      nextsilicon/TestNextSilicon_Nsapi_Link.cpp
+  )
+ENDIF(KOKKOS_ENABLE_NEXTSILICON)
 
 set(DEFAULT_DEVICE_SOURCES
     UnitTestMainInit.cpp

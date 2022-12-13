@@ -77,6 +77,8 @@ else()
 endif()
 kokkos_tpl_option(LIBQUADMATH ${LIBQUADMATH_DEFAULT} TRIBITS quadmath)
 
+kokkos_tpl_option(NSAPI ${Kokkos_ENABLE_NEXTSILICON} TRIBITS NSAPI)
+
 #Make sure we use our local FindKokkosCuda.cmake
 kokkos_import_tpl(HPX INTERFACE)
 kokkos_import_tpl(CUDA INTERFACE)
@@ -91,6 +93,7 @@ endif()
 kokkos_import_tpl(ONEDPL INTERFACE)
 kokkos_import_tpl(LIBQUADMATH)
 kokkos_import_tpl(ROCTHRUST)
+kokkos_import_tpl(NSAPI)
 
 if(Kokkos_ENABLE_DESUL_ATOMICS_EXTERNAL)
   find_package(desul REQUIRED COMPONENTS atomics)

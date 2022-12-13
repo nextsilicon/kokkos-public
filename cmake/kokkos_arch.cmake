@@ -1254,7 +1254,7 @@ endforeach()
 #Let's just always print things
 message(STATUS "Built-in Execution Spaces:")
 
-foreach(_BACKEND Cuda OpenMPTarget HIP SYCL OpenACC)
+foreach(_BACKEND Cuda OpenMPTarget HIP SYCL OpenACC NextSilicon)
   string(TOUPPER ${_BACKEND} UC_BACKEND)
   if(KOKKOS_ENABLE_${UC_BACKEND})
     if(_DEVICE_PARALLEL)
