@@ -63,7 +63,7 @@ else()
   set(KOKKOS_OPENACC_FEATURE_LEVEL 17)
 endif()
 
-SET(KOKKOS_NEXTSILICON_FEATURE_LEVEL 8)
+SET(KOKKOS_NEXTSILICON_FEATURE_LEVEL 11)
 SET(KOKKOS_NEXTSILICON_NAME Experimental::NextSilicon)
 
 set(KOKKOS_OPENACC_NAME Experimental::OpenACC)
@@ -894,10 +894,9 @@ if (KOKKOS_ENABLE_NEXTSILICON)
     default/TestDefaultDeviceType_a2.cpp # FIXME_NEXTSILICON: needs custom reduction
     default/TestDefaultDeviceType_b2.cpp # FIXME_NEXTSILICON: needs custom reduction
     default/TestDefaultDeviceType_c2.cpp # FIXME_NEXTSILICON: needs custom reduction
-    default/TestDefaultDeviceType_a3.cpp # FIXME_NEXTSILICON: needs TeamPolicy
-    default/TestDefaultDeviceType_b3.cpp # FIXME_NEXTSILICON: needs TeamPolicy
-    default/TestDefaultDeviceType_c3.cpp # FIXME_NEXTSILICON: needs TeamPolicy
-    default/TestDefaultDeviceTypeResize.cpp  # FIXME_NEXTSILICON: MDRange
+    default/TestDefaultDeviceType_a3.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_b3.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_c3.cpp # FIXME_NEXTSILICON: needs custom reduction
   )
 endif()
 

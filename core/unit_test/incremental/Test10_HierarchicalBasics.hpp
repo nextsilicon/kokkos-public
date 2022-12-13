@@ -73,6 +73,11 @@ TEST(TEST_CATEGORY, IncrTest_10_Hierarchical_Basics) {
   test.run(1, 32);
   test.run(8, 64);
   test.run(11, 128);
+#elif defined(KOKKOS_ENABLE_NEXTSILICON)  // NextSilicon backend only accepts 1
+                                          // thread per team
+  test.run(1, 1);
+  test.run(8, 1);
+  test.run(11, 1);
 #else
   test.run(1, 4);
   test.run(8, 16);
