@@ -434,7 +434,7 @@
 #endif
 
 // If default is not specified then chose from enabled execution spaces.
-// Priority: CUDA, HIP, SYCL, OPENACC, OPENMPTARGET, NEXTSILICON, OPENMP, 
+// Priority: CUDA, HIP, SYCL, OPENACC, OPENMPTARGET, NEXTSILICON, OPENMP,
 // THREADS, HPX, SERIAL
 #if defined(KOKKOS_ENABLE_DEFAULT_DEVICE_TYPE_CUDA)
 #elif defined(KOKKOS_ENABLE_DEFAULT_DEVICE_TYPE_HIP)
@@ -543,7 +543,6 @@ static constexpr bool kokkos_omp_on_host() { return false; }
 // FIXME_NEXTSILICON: Logic for IF_ON_DEVICE/IF_ON_HOST needs to be defined
 // #ifdef KOKKOS_ENABLE_NEXTSILICON
 // #endif
-
 
 #if !defined(KOKKOS_IF_ON_HOST) && !defined(KOKKOS_IF_ON_DEVICE)
 #if (defined(KOKKOS_ENABLE_CUDA) && defined(__CUDA_ARCH__)) ||         \
