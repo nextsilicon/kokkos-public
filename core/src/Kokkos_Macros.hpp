@@ -540,10 +540,6 @@ static constexpr bool kokkos_omp_on_host() { return false; }
 #endif
 #endif
 
-// FIXME_NEXTSILICON: Logic for IF_ON_DEVICE/IF_ON_HOST needs to be defined
-// #ifdef KOKKOS_ENABLE_NEXTSILICON
-// #endif
-
 #if !defined(KOKKOS_IF_ON_HOST) && !defined(KOKKOS_IF_ON_DEVICE)
 #if (defined(KOKKOS_ENABLE_CUDA) && defined(__CUDA_ARCH__)) ||         \
     (defined(KOKKOS_ENABLE_HIP) && defined(__HIP_DEVICE_COMPILE__)) || \
