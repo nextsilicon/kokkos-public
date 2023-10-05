@@ -129,7 +129,7 @@ if(Kokkos_ENABLE_OPENMPTARGET)
 endif()
 kokkos_add_executable(CoreTestCompileOnly SOURCES TestCompileMain.cpp ${COMPILE_ONLY_SOURCES})
 
-foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;HIP;SYCL)
+foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;NextSilicon;HIP;SYCL)
   string(TOUPPER ${Tag} DEVICE)
   string(TOLOWER ${Tag} dir)
 
@@ -181,6 +181,16 @@ foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;HIP;SYCL)
       MathematicalFunctions3
       MathematicalSpecialFunctions
     )
+
+      if (KOKKOS_ENABLE_NEXTSILICON)
+        if (Name STREQUAL "Abort") # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
+          continue()
+        endif()
+        if (Name STREQUAL "CheckedIntegerOps") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
+          continue()
+        endif()
+      endif()
+
       set(file ${dir}/Test${Tag}_${Name}.cpp)
       # Write to a temporary intermediate file and call configure_file to avoid
       # updating timestamps triggering unnecessary rebuilds on subsequent cmake runs.
@@ -226,6 +236,13 @@ foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;HIP;SYCL)
         SpaceAwareAccessor
         Swap
     )
+
+    if (KOKKOS_ENABLE_NEXTSILICON)
+      if (Name STREQUAL "MDRangePolicyConstructors") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
+        continue()
+      endif()
+    endif()
+
     if(NOT Kokkos_ENABLE_IMPL_MDSPAN)
       list(REMOVE_ITEM ${Tag}_TESTNAMES1B MDSpanAtomicAccessor MDSpanConversion SpaceAwareAccessorAccessViolation
            SpaceAwareAccessor
@@ -282,6 +299,19 @@ foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;HIP;SYCL)
         WorkGraph
         WithoutInitializing
     )
+
+    if (KOKKOS_ENABLE_NEXTSILICON)
+      if (Name STREQUAL "ViewCtorDimMatch") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
+        continue()
+      endif()
+      if (Name STREQUAL "ViewLayoutStrideAssignment") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
+        continue()
+      endif()
+      if (Name STREQUAL "ViewMemoryAccessViolation") # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
+        continue()
+      endif()
+    endif()
+
     # Workaround to internal compiler error with intel classic compilers
     # when using -no-ip flag in ViewCopy_c
     # See issue: https://github.com/kokkos/kokkos/issues/7084
@@ -677,6 +707,17 @@ if(KOKKOS_ENABLE_OPENACC AND KOKKOS_CXX_COMPILER_ID STREQUAL Clang)
   list(REMOVE_ITEM Serial_SOURCES1 ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_Atomics.cpp)
 endif()
 
+IF(KOKKOS_ENABLE_NEXTSILICON)
+  list(REMOVE_ITEM Serial_SOURCES1
+    # FIXME_NEXTSILICON: needs team policy
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CommonPolicyConstructors.cpp
+  )
+  # FIXME_NEXTSILICON: needs MDRange policty
+  list(REMOVE_ITEM Serial_SOURCES2
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewAPI_c.cpp
+  )
+endif()
+
 if(Kokkos_ENABLE_SERIAL)
   kokkos_add_executable_and_test(
     CoreUnitTest_Serial1 SOURCES UnitTestMainInit.cpp ${Serial_SOURCES1} serial/TestSerial_Task.cpp
@@ -869,6 +910,21 @@ if(KOKKOS_ENABLE_OPENACC OR KOKKOS_ENABLE_OPENMPTARGET)
   list(REMOVE_ITEM DEFAULT_DEVICE_SOURCES TestSharedHostPinnedSpace.cpp)
 endif()
 
+if (KOKKOS_ENABLE_NEXTSILICON)
+  LIST(REMOVE_ITEM DEFAULT_DEVICE_SOURCES 
+    default/TestDefaultDeviceType_a1.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_b1.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_c1.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_a2.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_b2.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_c2.cpp # FIXME_NEXTSILICON: needs custom reduction
+    default/TestDefaultDeviceType_a3.cpp # FIXME_NEXTSILICON: needs TeamPolicy
+    default/TestDefaultDeviceType_b3.cpp # FIXME_NEXTSILICON: needs TeamPolicy
+    default/TestDefaultDeviceType_c3.cpp # FIXME_NEXTSILICON: needs TeamPolicy
+    default/TestDefaultDeviceTypeResize.cpp  # FIXME_NEXTSILICON: MDRange
+  )
+endif()
+
 # FIXME_OPENMPTARGET, FIXME_OPENACC - Comment non-passing tests with the NVIDIA HPC compiler nvc++
 if((KOKKOS_ENABLE_OPENMPTARGET OR KOKKOS_ENABLE_OPENACC) AND KOKKOS_CXX_COMPILER_ID STREQUAL NVHPC)
   list(
@@ -909,7 +965,9 @@ endif()
 
 kokkos_add_executable_and_test(CoreUnitTest_Default SOURCES ${DEFAULT_DEVICE_SOURCES})
 
+if (NOT KOKKOS_ENABLE_NEXTSILICON) # FIXME_NEXTSILICON: why is this disabled?
 kokkos_add_executable_and_test(CoreUnitTest_LegionInitialization SOURCES UnitTestMain.cpp TestLegionInitialization.cpp)
+endif()
 
 kokkos_add_executable_and_test(CoreUnitTest_PushFinalizeHook SOURCES UnitTest_PushFinalizeHook.cpp)
 
@@ -956,6 +1014,10 @@ if(KOKKOS_ENABLE_OPENMPTARGET AND KOKKOS_CXX_COMPILER_ID STREQUAL IntelLLVM)
   list(REMOVE_ITEM KOKKOSP_SOURCES tools/TestEventCorrectness.cpp)
 endif()
 
+if(KOKKOS_ENABLE_NEXTSILICON)
+  list(REMOVE_ITEM KOKKOSP_SOURCES tools/TestEventCorrectness.cpp) # FIXME_NEXTSILICON: ParallelScan
+endif()
+
 kokkos_add_executable_and_test(CoreUnitTest_KokkosP SOURCES ${KOKKOSP_SOURCES})
 if(KOKKOS_ENABLE_LIBDL)
   kokkos_add_executable_and_test(CoreUnitTest_ToolIndependence SOURCES tools/TestIndependence.cpp)
@@ -968,7 +1030,9 @@ if(KOKKOS_ENABLE_LIBDL)
 
   kokkos_add_test_executable(ProfilingAllCalls tools/TestAllCalls.cpp)
 
+  if (NOT KOKKOS_ENABLE_NEXTSILICON)
   kokkos_add_test_executable(ToolsInitialization UnitTestMain.cpp tools/TestToolsInitialization.cpp)
+  endif()
 
   set(ADDRESS_REGEX "0x[0-9a-f]*")
   set(MEMSPACE_REGEX "[HC][ou][sd][ta][a-zA-Z]*")
@@ -1039,6 +1103,8 @@ if(KOKKOS_ENABLE_LIBDL)
     "kokkosp_init_library::kokkosp_parse_args:4:Kokkos_ProfilingAllCalls:-c:test:delimit::.*::kokkosp_allocate_data:${MEMSPACE_REGEX}:source:${ADDRESS_REGEX}:40::kokkosp_begin_parallel_for:Kokkos::View::initialization [[]source] via memset:[0-9]+:0::kokkosp_end_parallel_for:0::kokkosp_allocate_data:${MEMSPACE_REGEX}:destination:${ADDRESS_REGEX}:40::kokkosp_begin_parallel_for:Kokkos::View::initialization [[]destination] via memset:[0-9]+:0::kokkosp_end_parallel_for:0::kokkosp_begin_deep_copy:${MEMSPACE_REGEX}:destination:${ADDRESS_REGEX}:${MEMSPACE_REGEX}:source:${ADDRESS_REGEX}:40::.*kokkosp_end_deep_copy::kokkosp_begin_parallel_for:parallel_for:${SIZE_REGEX}:0::kokkosp_end_parallel_for:0::kokkosp_begin_parallel_reduce:parallel_reduce:${SIZE_REGEX}:1${SKIP_SCRATCH_INITIALIZATION_REGEX}::kokkosp_end_parallel_reduce:1::kokkosp_begin_parallel_scan:parallel_scan:${SIZE_REGEX}:2::kokkosp_end_parallel_scan:2::kokkosp_push_profile_region:push_region::kokkosp_pop_profile_region::kokkosp_create_profile_section:created_section:3::kokkosp_start_profile_section:3::kokkosp_stop_profile_section:3::kokkosp_destroy_profile_section:3::kokkosp_profile_event:profiling_event::kokkosp_declare_metadata:dogs:good::kokkosp_deallocate_data:${MEMSPACE_REGEX}:destination:${ADDRESS_REGEX}:40::kokkosp_deallocate_data:${MEMSPACE_REGEX}:source:${ADDRESS_REGEX}:40::kokkosp_finalize_library::"
   )
 endif() #KOKKOS_ENABLE_LIBDL
+# FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
+if(NOT KOKKOS_ENABLE_NEXTSILICON)
 kokkos_add_test_executable(
   StackTraceTestExec
   SOURCES
@@ -1049,6 +1115,7 @@ kokkos_add_test_executable(
   TestStackTrace_f3.cpp
   TestStackTrace_f4.cpp
 )
+endif()
 # We need -rdynamic on GNU platforms for the stacktrace functionality
 # to work correctly with shared libraries
 kokkos_set_exe_property(StackTraceTestExec ENABLE_EXPORTS ON)
