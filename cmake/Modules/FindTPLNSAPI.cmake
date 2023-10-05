@@ -1,18 +1,16 @@
-# as of nextcxx version 0.4.7 (check inside nextcxx)
-#   $ cat $(which nextcxx)
-#
-# nextcxx searches the following include paths automatically:
-#   $ nextcxx -v main.cpp
-#   #include <...> search starts here:
-#   /opt/nextsilicon/bin/../sysroot/usr/include/c++/v1
-#   /opt/nextsilicon/bin/../sysroot/usr/include
-#   /usr/local/include
-#   /opt/nextsilicon/llvm/lib/clang/12.0.1/include
-#
-#   /opt/nextsilicon/bin/../sysroot/usr/include has a copy of the
-#   nsapi headers, so we do not need to search for them here
+# NSapi shared object and header both reside under NEXT_HOME directory
+# Library under ${NEXT_HOME}/lib
+# Headers under ${NEXT_HOME}/include
+
+if (DEFINED ENV{NEXT_HOME})
+    set(NEXT_HOME_PATH $ENV{NEXT_HOME})
+else()
+    # Give a default path in case env is not define.
+    set(NEXT_HOME_PATH /opt/nextsilicon)
+endif()
 
 KOKKOS_FIND_IMPORTED(NSAPI 
 LIBRARY nsapi
-LIBRARY_PATHS /opt/nextsilicon
+LIBRARY_PATHS ${NEXT_HOME_PATH}
+HEADER_PATHS ${NEXT_HOME_PATH}
 )

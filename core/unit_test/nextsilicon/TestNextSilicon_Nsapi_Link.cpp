@@ -23,6 +23,6 @@
 namespace Test {
 TEST(nextsilicon, nsapi_link) {
   // doesn't really do anything and don't care if it does
-  nsapi_mem_advise(nullptr, 0, 0, nullptr);
+  nsapi_mem_migrate(nullptr, 0, NSAPI_PAGE_LOC_HOST, false);
 }
 }  // namespace Test

@@ -17,7 +17,7 @@
 #ifndef KOKKOS_NEXTSILICON_HPP
 #define KOKKOS_NEXTSILICON_HPP
 
-#include <nsapi/devices.h>
+#include <nsapi/intrinsics.h>
 
 #include <Kokkos_Concepts.hpp>
 #include <Kokkos_Layout.hpp>
@@ -72,7 +72,7 @@ class NextSilicon {
   static bool in_parallel() {
     // true if we're inside a handed-off function, false otherwise
     // FIXME_NEXTSILICON in_parallel unimplemented
-    return false;
+    return __nsapi_is_on_cg();
   }
   uint32_t impl_instance_id() const noexcept;
   Impl::NextSiliconInternal* impl_internal_space_instance() const {
