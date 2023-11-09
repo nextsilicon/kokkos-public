@@ -21,18 +21,17 @@
 #include <impl/Kokkos_SharedAlloc.hpp>
 
 template <>
-class Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
-                                           void>
-    : public HostInaccessibleSharedAllocationRecordCommon<
+class Kokkos::Impl::SharedAllocationRecord<
+    Kokkos::Experimental::NextSiliconSpace, void>
+    : public SharedAllocationRecordCommon<
           Kokkos::Experimental::NextSiliconSpace> {
  private:
-  friend class HostInaccessibleSharedAllocationRecordCommon<
+  friend class SharedAllocationRecordCommon<
       Kokkos::Experimental::NextSiliconSpace>;
-  friend class SharedAllocationRecordCommon<Kokkos::Experimental::NextSiliconSpace>;
   friend Kokkos::Experimental::NextSiliconSpace;
 
-  using base_t = HostInaccessibleSharedAllocationRecordCommon<
-      Kokkos::Experimental::NextSiliconSpace>;
+  using base_t =
+      SharedAllocationRecordCommon<Kokkos::Experimental::NextSiliconSpace>;
   using RecordBase = SharedAllocationRecord<void, void>;
 
   SharedAllocationRecord(const SharedAllocationRecord&) = delete;

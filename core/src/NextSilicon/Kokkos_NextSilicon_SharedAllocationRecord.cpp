@@ -22,8 +22,9 @@
 #include <Kokkos_HostSpace.hpp>
 
 #ifdef KOKKOS_ENABLE_DEBUG
-Kokkos::Impl::SharedAllocationRecord<void, void> SharedAllocationRecord<
-    Kokkos::Experimental::NextSiliconSpace, void>::s_root_record;
+Kokkos::Impl::SharedAllocationRecord<void, void>
+    Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
+                                         void>::s_root_record;
 #endif
 
 Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
@@ -34,7 +35,8 @@ Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
                       sizeof(SharedAllocationHeader)));
 }
 
-Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace, void>::
+Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
+                                     void>::
     SharedAllocationRecord(
         const Kokkos::Experimental::NextSiliconSpace &arg_space,
         const std::string &arg_label, const size_t arg_alloc_size,
@@ -63,9 +65,10 @@ Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace, voi
       "HostSpace");
 }
 
-Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace, void>::
+Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
+                                     void>::
     SharedAllocationRecord(
-        const Kokkos::Experimental::OpenACC &arg_exec_space,
+        const Kokkos::Experimental::NextSilicon &arg_exec_space,
         const Kokkos::Experimental::NextSiliconSpace &arg_space,
         const std::string &arg_label, const size_t arg_alloc_size,
         const SharedAllocationRecord<void, void>::function_type arg_dealloc)
