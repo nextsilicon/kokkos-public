@@ -19,6 +19,9 @@
 
 #if defined(KOKKOS_ENABLE_NEXTSILICON)
 #include <NextSilicon/Kokkos_NextSilicon.hpp>
+#include <NextSilicon/Kokkos_NextSiliconSpace.hpp>
+#include <NextSilicon/Kokkos_NextSilicon_DeepCopy.hpp>
+#include <NextSilicon/Kokkos_NextSilicon_SharedAllocationRecord.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelFor_Range.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelReduce_Range.hpp>
 #endif

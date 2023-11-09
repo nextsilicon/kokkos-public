@@ -19,9 +19,9 @@
 
 #include <nsapi/intrinsics.h>
 
+#include <NextSilicon/Kokkos_NextSiliconSpace.hpp>
 #include <Kokkos_Concepts.hpp>
 #include <Kokkos_Layout.hpp>
-#include <Kokkos_HostSpace.hpp>
 #include <Kokkos_ScratchSpace.hpp>
 #include <impl/Kokkos_HostSharedPtr.hpp>
 
@@ -44,7 +44,7 @@ class NextSilicon {
 
  public:
   using execution_space = NextSilicon;
-  using memory_space    = Kokkos::HostSpace;
+  using memory_space    = Kokkos::Experimental::NextSiliconSpace;
   using device_type     = Kokkos::Device<execution_space, memory_space>;
 
   using array_layout = LayoutLeft;
