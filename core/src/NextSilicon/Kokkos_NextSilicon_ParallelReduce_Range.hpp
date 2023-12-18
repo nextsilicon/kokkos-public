@@ -33,7 +33,7 @@ struct NextSiliconParallelReduceHelper {
   NextSiliconParallelReduceHelper(Functor const&, Reducer const&,
                                   Policy const&) {
     static_assert(
-        std::is_void_v<Functor>::value,
+        Kokkos::Impl::always_false<Functor>::value,
         "NextSilicon parallel_reduce not implemented for this value_type");
   }
 };
