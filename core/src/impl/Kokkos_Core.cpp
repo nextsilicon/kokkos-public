@@ -145,7 +145,16 @@ int get_device_count() {
 #elif defined(KOKKOS_ENABLE_OPENMPTARGET)
   return omp_get_num_devices();
 #elif defined(KOKKOS_ENABLE_NEXTSILICON)
-  return Kokkos::Experimental::NextSilicon::detect_device_count();
+#if 0
+  // this is not working as of 0.13.1
+  // https://nextsilicon.atlassian.net/servicedesk/customer/portal/3/CS-198
+  nsapi_device *devs;
+  int ndev = nsapi_device_get_all_devices(&devs);
+  nsapi_device_free_all_devices(devs);
+  // don't care about device info yet 
+  return ndev;
+#endif
+  return 1;
 #else
   Kokkos::abort("implementation bug");
   return -1;
