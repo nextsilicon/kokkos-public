@@ -182,15 +182,6 @@ foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;NextSilicon;HIP;
       MathematicalSpecialFunctions
     )
 
-      if (KOKKOS_ENABLE_NEXTSILICON)
-        if (Name STREQUAL "Abort") # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
-          continue()
-        endif()
-        if (Name STREQUAL "CheckedIntegerOps") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
-          continue()
-        endif()
-      endif()
-
       set(file ${dir}/Test${Tag}_${Name}.cpp)
       # Write to a temporary intermediate file and call configure_file to avoid
       # updating timestamps triggering unnecessary rebuilds on subsequent cmake runs.
@@ -299,18 +290,6 @@ foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;NextSilicon;HIP;
         WorkGraph
         WithoutInitializing
     )
-
-    if (KOKKOS_ENABLE_NEXTSILICON)
-      if (Name STREQUAL "ViewCtorDimMatch") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
-        continue()
-      endif()
-      if (Name STREQUAL "ViewLayoutStrideAssignment") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
-        continue()
-      endif()
-      if (Name STREQUAL "ViewMemoryAccessViolation") # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
-        continue()
-      endif()
-    endif()
 
     # Workaround to internal compiler error with intel classic compilers
     # when using -no-ip flag in ViewCopy_c
@@ -709,12 +688,16 @@ endif()
 
 IF(KOKKOS_ENABLE_NEXTSILICON)
   list(REMOVE_ITEM Serial_SOURCES1
-    # FIXME_NEXTSILICON: needs team policy
-    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CommonPolicyConstructors.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CommonPolicyConstructors.cpp # FIXME_NEXTSILICON: needs team policy
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_Abort.cpp # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CheckedIntegerOps.cpp # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
   )
   # FIXME_NEXTSILICON: needs MDRange policty
   list(REMOVE_ITEM Serial_SOURCES2
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewAPI_c.cpp
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewCtorDimMatch.cpp # hang (ASSERT_DEATH?)
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewLayoutStrideAssignment.cpp # hang (ASSERT_DEATH?)
+    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewMemoryAccessViolation.cpp # hang (ASSERT_DEATH?)
   )
 endif()
 
