@@ -965,9 +965,7 @@ endif()
 
 kokkos_add_executable_and_test(CoreUnitTest_Default SOURCES ${DEFAULT_DEVICE_SOURCES})
 
-if (NOT KOKKOS_ENABLE_NEXTSILICON) # FIXME_NEXTSILICON: why is this disabled?
 kokkos_add_executable_and_test(CoreUnitTest_LegionInitialization SOURCES UnitTestMain.cpp TestLegionInitialization.cpp)
-endif()
 
 kokkos_add_executable_and_test(CoreUnitTest_PushFinalizeHook SOURCES UnitTest_PushFinalizeHook.cpp)
 
