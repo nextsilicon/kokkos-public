@@ -21,7 +21,6 @@
 
 namespace Kokkos::Experimental::Impl {
 
-// strip a void WorkTag off a functor
 template <class Functor, class Policy>
 class FunctorAdapter {
   Functor m_functor;
