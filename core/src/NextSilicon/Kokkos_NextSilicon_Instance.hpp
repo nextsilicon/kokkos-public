@@ -24,6 +24,8 @@
 namespace Kokkos::Experimental::Impl {
 
 struct NextSiliconTraits {
+  /* Alignment requirement for fill operations. */
+  static constexpr size_t FillAlignmend   = 0x40;
   static constexpr size_t BmtUseThreshold = 0x200 /* 512 bytes */;
 };
 
