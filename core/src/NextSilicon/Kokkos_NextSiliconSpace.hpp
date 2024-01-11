@@ -30,6 +30,13 @@ static_assert(false,
 
 namespace Kokkos::Experimental {
 
+namespace Impl {
+
+template <typename T>
+struct is_nextsilicon_type_space : public std::false_type {};
+
+}  // namespace Impl
+
 class NextSilicon;
 
 class NextSiliconSpace {
@@ -77,36 +84,133 @@ class NextSiliconSpace {
                            Kokkos::Tools::make_space_handle(name())) const;
 };
 
+template <>
+struct Impl::is_nextsilicon_type_space<NextSiliconSpace>
+    : public std::true_type {};
+
+}  // namespace Kokkos::Experimental
+
+namespace Kokkos::Experimental {
+
+class NextSiliconManagedSpace {
+ public:
+  using memory_space    = NextSiliconManagedSpace;
+  using execution_space = NextSilicon;
+  using device_type     = Kokkos::Device<execution_space, memory_space>;
+
+  using size_type = size_t;
+
+  NextSiliconManagedSpace() = default;
+
+  /**\brief  Allocate untracked memory in the space */
+  void* allocate(const Kokkos::Experimental::NextSilicon& exec_space,
+                 const size_t arg_alloc_size) const;
+  void* allocate(const Kokkos::Experimental::NextSilicon& exec_space,
+                 const char* arg_label, const size_t arg_alloc_size,
+                 const size_t arg_logical_size = 0) const;
+  void* allocate(const size_t arg_alloc_size) const;
+  void* allocate(const char* arg_label, const size_t arg_alloc_size,
+                 const size_t arg_logical_size = 0) const;
+
+  /**\brief  Deallocate untracked memory in the space */
+  void deallocate(void* const arg_alloc_ptr, const size_t arg_alloc_size) const;
+  void deallocate(const char* arg_label, void* const arg_alloc_ptr,
+                  const size_t arg_alloc_size,
+                  const size_t arg_logical_size = 0) const;
+
+  static constexpr char const* name() { return "NextSiliconManagedSpace"; }
+
+ private:
+  void* impl_allocate(const Kokkos::Experimental::NextSilicon& exec_space,
+                      const char* arg_label, const size_t arg_alloc_size,
+                      const size_t arg_logical_size = 0,
+                      const Kokkos::Tools::SpaceHandle =
+                          Kokkos::Tools::make_space_handle(name())) const;
+  void* impl_allocate(const char* arg_label, const size_t arg_alloc_size,
+                      const size_t arg_logical_size = 0,
+                      const Kokkos::Tools::SpaceHandle =
+                          Kokkos::Tools::make_space_handle(name())) const;
+  void impl_deallocate(const char* arg_label, void* const arg_alloc_ptr,
+                       const size_t arg_alloc_size,
+                       const size_t arg_logical_size = 0,
+                       const Kokkos::Tools::SpaceHandle =
+                           Kokkos::Tools::make_space_handle(name())) const;
+};
+
+template <>
+struct Impl::is_nextsilicon_type_space<NextSiliconManagedSpace>
+    : public std::true_type {};
+
 }  // namespace Kokkos::Experimental
 
 /*--------------------------------------------------------------------------*/
 
-// FIXME_NEXTSILICON: NextSiliconSpace currently relies on transparent page migration, and is thus host accessible
+namespace Kokkos {
+namespace Impl {
+
+static_assert(Kokkos::Impl::MemorySpaceAccess<
+              Experimental::NextSiliconSpace,
+              Experimental::NextSiliconSpace>::assignable);
+
+static_assert(Kokkos::Impl::MemorySpaceAccess<
+              Experimental::NextSiliconManagedSpace,
+              Experimental::NextSiliconManagedSpace>::assignable);
+
+// Limit access and assignment from HostSpace to NextSiliconSpace
+// NextSiliconSpace::execution_space can always access and assign Host memory.
+// NextSiliconManagedSpace accessible and assignable from everywhere.
+
 template <>
-struct Kokkos::Impl::MemorySpaceAccess<Kokkos::HostSpace,
-                                       Kokkos::Experimental::NextSiliconSpace> {
+struct MemorySpaceAccess<Kokkos::HostSpace,
+                         Kokkos::Experimental::NextSiliconSpace> {
+  enum : bool { assignable = false };
+  enum : bool { accessible = false };
+  enum : bool { deepcopy = true };
+};
+
+template <>
+struct MemorySpaceAccess<Kokkos::HostSpace,
+                         Kokkos::Experimental::NextSiliconManagedSpace> {
   enum : bool { assignable = true };
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
 
-// FIXME_NEXTSILICON: NextSiliconSpace currently relies on transparent page migration, and is thus host accessible
 template <>
-struct Kokkos::Impl::MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
-                                       Kokkos::HostSpace> {
+struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
+                         Kokkos::HostSpace> {
   enum : bool { assignable = true };
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
 
-// FIXME_NEXTSILICON: NextSiliconSpace currently relies on transparent page migration, and is thus host accessible
 template <>
-struct Kokkos::Impl::MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
-                                       Kokkos::Experimental::NextSiliconSpace> {
+struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
+                         Kokkos::Experimental::NextSiliconManagedSpace> {
   enum : bool { assignable = true };
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
+
+template <>
+struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconManagedSpace,
+                         Kokkos::HostSpace> {
+  enum : bool { assignable = true };
+  enum : bool { accessible = true };
+  enum : bool { deepcopy = true };
+};
+
+template <>
+struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconManagedSpace,
+                         Kokkos::Experimental::NextSiliconSpace> {
+  enum : bool { assignable = true };
+  enum : bool { accessible = true };
+  enum : bool { deepcopy = true };
+};
+
+}  // namespace Impl
+}  // namespace Kokkos
+
 /*--------------------------------------------------------------------------*/
 
 #endif

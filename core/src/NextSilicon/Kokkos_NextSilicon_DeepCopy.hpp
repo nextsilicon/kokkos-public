@@ -22,86 +22,172 @@
 
 #include <Kokkos_Concepts.hpp>
 
+namespace Kokkos {
+namespace Impl {
+
+void DeepCopySharedNextSilicon(void* dst, const void* src, size_t n);
+void DeepCopyDeviceNextSilicon(void* dst, const void* src, size_t n);
+
 template <>
-struct Kokkos::Impl::DeepCopy<Kokkos::Experimental::NextSiliconSpace,
-                              Kokkos::Experimental::NextSiliconSpace,
-                              Kokkos::Experimental::NextSilicon> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSpace,
+                Kokkos::Experimental::NextSiliconSpace,
+                Kokkos::Experimental::NextSilicon> {
   DeepCopy(void* dst, const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
-  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst,
-           const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst, const void* src,
+           size_t n) {
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
 };
 
 template <class ExecutionSpace>
-struct Kokkos::Impl::DeepCopy<Kokkos::Experimental::NextSiliconSpace,
-                              Kokkos::Experimental::NextSiliconSpace,
-                              ExecutionSpace> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSpace,
+                Kokkos::Experimental::NextSiliconSpace, ExecutionSpace> {
   DeepCopy(void* dst, const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
   DeepCopy(const ExecutionSpace& exec, void* dst, const void* src, size_t n) {
     exec.fence(
         "Kokkos::Impl::DeepCopy<NextSiliconSpace, NextSiliconSpace, "
         "ExecutionSpace>::DeepCopy: fence before copy");
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
 };
 
 template <>
-struct Kokkos::Impl::DeepCopy<Kokkos::Experimental::NextSiliconSpace,
-                              Kokkos::HostSpace,
-                              Kokkos::Experimental::NextSilicon> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSpace, Kokkos::HostSpace,
+                Kokkos::Experimental::NextSilicon> {
   DeepCopy(void* dst, const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
-  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst,
-           const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst, const void* src,
+           size_t n) {
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
 };
 
 template <class ExecutionSpace>
-struct Kokkos::Impl::DeepCopy<Kokkos::Experimental::NextSiliconSpace,
-                              Kokkos::HostSpace, ExecutionSpace> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSpace, Kokkos::HostSpace,
+                ExecutionSpace> {
   DeepCopy(void* dst, const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
   DeepCopy(const ExecutionSpace& exec, void* dst, const void* src, size_t n) {
     exec.fence(
         "Kokkos::Impl::DeepCopy<NextSiliconSpace, HostSpace, "
         "ExecutionSpace>::DeepCopy: fence before copy");
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
 };
 
 template <>
-struct Kokkos::Impl::DeepCopy<Kokkos::HostSpace,
-                              Kokkos::Experimental::NextSiliconSpace,
-                              Kokkos::Experimental::NextSilicon> {
+struct DeepCopy<Kokkos::HostSpace, Kokkos::Experimental::NextSiliconSpace,
+                Kokkos::Experimental::NextSilicon> {
   DeepCopy(void* dst, const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
-  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst,
-           const void* src, size_t n) {
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst, const void* src,
+           size_t n) {
+    DeepCopyDeviceNextSilicon(dst, src, n);
   }
 };
 
 template <class ExecutionSpace>
-struct Kokkos::Impl::DeepCopy<
-    Kokkos::HostSpace, Kokkos::Experimental::NextSiliconSpace, ExecutionSpace> {
+struct DeepCopy<Kokkos::HostSpace, Kokkos::Experimental::NextSiliconSpace,
+                ExecutionSpace> {
   DeepCopy(void* dst, const void* src, size_t n) {
-   std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopySharedNextSilicon(dst, src, n);
   }
   DeepCopy(const ExecutionSpace& exec, void* dst, const void* src, size_t n) {
     exec.fence(
         "Kokkos::Impl::DeepCopy<HostSpace, NextSiliconSpace, "
         "ExecutionSpace>::DeepCopy: fence before copy");
-    std::memcpy(dst, src, n); // FIXME_NEXTSILICON: transparent page migration
+    DeepCopySharedNextSilicon(dst, src, n);
   }
 };
+
+template <>
+struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
+                Kokkos::Experimental::NextSiliconManagedSpace,
+                Kokkos::Experimental::NextSilicon> {
+  DeepCopy(void* dst, const void* src, size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst, const void* src,
+           size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+};
+
+template <class ExecutionSpace>
+struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
+                Kokkos::Experimental::NextSiliconManagedSpace, ExecutionSpace> {
+  DeepCopy(void* dst, const void* src, size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+  DeepCopy(const ExecutionSpace& exec, void* dst, const void* src, size_t n) {
+    exec.fence(
+        "Kokkos::Impl::DeepCopy<NextSiliconSpace, NextSiliconSpace, "
+        "ExecutionSpace>::DeepCopy: fence before copy");
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+};
+
+template <>
+struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
+                Kokkos::HostSpace, Kokkos::Experimental::NextSilicon> {
+  DeepCopy(void* dst, const void* src, size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst, const void* src,
+           size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+};
+
+template <class ExecutionSpace>
+struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
+                Kokkos::HostSpace, ExecutionSpace> {
+  DeepCopy(void* dst, const void* src, size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+  DeepCopy(const ExecutionSpace& exec, void* dst, const void* src, size_t n) {
+    exec.fence(
+        "Kokkos::Impl::DeepCopy<NextSiliconSpace, HostSpace, "
+        "ExecutionSpace>::DeepCopy: fence before copy");
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+};
+
+template <>
+struct DeepCopy<Kokkos::HostSpace,
+                Kokkos::Experimental::NextSiliconManagedSpace,
+                Kokkos::Experimental::NextSilicon> {
+  DeepCopy(void* dst, const void* src, size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+  DeepCopy(const Kokkos::Experimental::NextSilicon&, void* dst, const void* src,
+           size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+};
+
+template <class ExecutionSpace>
+struct DeepCopy<Kokkos::HostSpace,
+                Kokkos::Experimental::NextSiliconManagedSpace, ExecutionSpace> {
+  DeepCopy(void* dst, const void* src, size_t n) {
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+  DeepCopy(const ExecutionSpace& exec, void* dst, const void* src, size_t n) {
+    exec.fence(
+        "Kokkos::Impl::DeepCopy<HostSpace, NextSiliconSpace, "
+        "ExecutionSpace>::DeepCopy: fence before copy");
+    DeepCopySharedNextSilicon(dst, src, n);
+  }
+};
+
+}  // namespace Impl
+}  // namespace Kokkos
 
 #endif

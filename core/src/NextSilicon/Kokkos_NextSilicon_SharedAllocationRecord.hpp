@@ -35,6 +35,7 @@ class Kokkos::Impl::SharedAllocationRecord<
   using RecordBase = SharedAllocationRecord<void, void>;
 
   SharedAllocationRecord(const SharedAllocationRecord&) = delete;
+
   SharedAllocationRecord& operator=(const SharedAllocationRecord&) = delete;
 
   /**\brief  Root record for tracked allocations from this NextSiliconSpace
@@ -64,6 +65,55 @@ class Kokkos::Impl::SharedAllocationRecord<
 
   SharedAllocationRecord(
       const Kokkos::Experimental::NextSiliconSpace& arg_space,
+      const std::string& arg_label, const size_t arg_alloc_size,
+      const RecordBase::function_type arg_dealloc = &deallocate);
+};
+
+template <>
+class Kokkos::Impl::SharedAllocationRecord<
+    Kokkos::Experimental::NextSiliconSharedUVMSpace, void>
+    : public SharedAllocationRecordCommon<
+          Kokkos::Experimental::NextSiliconSharedUVMSpace> {
+ private:
+  friend class SharedAllocationRecordCommon<
+      Kokkos::Experimental::NextSiliconSharedUVMSpace>;
+  friend Kokkos::Experimental::NextSiliconSharedUVMSpace;
+
+  using base_t = SharedAllocationRecordCommon<
+      Kokkos::Experimental::NextSiliconSharedUVMSpace>;
+  using RecordBase = SharedAllocationRecord<void, void>;
+
+  SharedAllocationRecord(const SharedAllocationRecord&) = delete;
+
+  SharedAllocationRecord& operator=(const SharedAllocationRecord&) = delete;
+
+  /**\brief  Root record for tracked allocations from this
+   * NextSiliconSharedUVMSpace instance */
+  static RecordBase s_root_record;
+
+  const Kokkos::Experimental::NextSiliconSharedUVMSpace m_space;
+
+ protected:
+  ~SharedAllocationRecord();
+  SharedAllocationRecord() = default;
+
+  template <typename ExecutionSpace>
+  SharedAllocationRecord(
+      const ExecutionSpace& /*exec_space*/,
+      const Kokkos::Experimental::NextSiliconSharedUVMSpace& arg_space,
+      const std::string& arg_label, const size_t arg_alloc_size,
+      const RecordBase::function_type arg_dealloc = &deallocate)
+      : SharedAllocationRecord(arg_space, arg_label, arg_alloc_size,
+                               arg_dealloc) {}
+
+  SharedAllocationRecord(
+      const Kokkos::Experimental::NextSilicon& exec_space,
+      const Kokkos::Experimental::NextSiliconSharedUVMSpace& arg_space,
+      const std::string& arg_label, const size_t arg_alloc_size,
+      const RecordBase::function_type arg_dealloc = &deallocate);
+
+  SharedAllocationRecord(
+      const Kokkos::Experimental::NextSiliconSharedUVMSpace& arg_space,
       const std::string& arg_label, const size_t arg_alloc_size,
       const RecordBase::function_type arg_dealloc = &deallocate);
 };

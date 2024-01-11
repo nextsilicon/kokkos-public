@@ -93,6 +93,81 @@ Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
       sizeof(SharedAllocationHeader));
 }
 
+#ifdef KOKKOS_ENABLE_DEBUG
+Kokkos::Impl::SharedAllocationRecord<void, void>
+    Kokkos::Impl::SharedAllocationRecord<
+        Kokkos::Experimental::NextSiliconSharedUVMSpace, void>::s_root_record;
+#endif
+
+Kokkos::Impl::SharedAllocationRecord<
+    Kokkos::Experimental::NextSiliconSharedUVMSpace,
+    void>::~SharedAllocationRecord() {
+  m_space.deallocate(m_label.c_str(),
+                     SharedAllocationRecord<void, void>::m_alloc_ptr,
+                     (SharedAllocationRecord<void, void>::m_alloc_size -
+                      sizeof(SharedAllocationHeader)));
+}
+
+Kokkos::Impl::SharedAllocationRecord<
+    Kokkos::Experimental::NextSiliconSharedUVMSpace, void>::
+    SharedAllocationRecord(
+        const Kokkos::Experimental::NextSiliconSharedUVMSpace &arg_space,
+        const std::string &arg_label, const size_t arg_alloc_size,
+        const SharedAllocationRecord<void, void>::function_type arg_dealloc)
+    // Pass through allocated [ SharedAllocationHeader , user_memory ]
+    // Pass through deallocation function
+    : base_t(
+#ifdef KOKKOS_ENABLE_DEBUG
+          &SharedAllocationRecord<
+              Kokkos::Experimental::NextSiliconSharedUVMSpace,
+              void>::s_root_record,
+#endif
+          Impl::checked_allocation_with_header(arg_space, arg_label,
+                                               arg_alloc_size),
+          sizeof(SharedAllocationHeader) + arg_alloc_size, arg_dealloc,
+          arg_label),
+      m_space(arg_space) {
+  SharedAllocationHeader header;
+
+  this->base_t::_fill_host_accessible_header_info(header, arg_label);
+
+  Kokkos::Impl::DeepCopy<Experimental::NextSiliconSharedUVMSpace, HostSpace>(
+      RecordBase::m_alloc_ptr, &header, sizeof(SharedAllocationHeader));
+  Kokkos::fence(
+      "SharedAllocationRecord<Kokkos::Experimental::NextSiliconSharedUVMSpace, "
+      "void>::SharedAllocationRecord(): fence after copying header from "
+      "HostSpace");
+}
+
+Kokkos::Impl::SharedAllocationRecord<
+    Kokkos::Experimental::NextSiliconSharedUVMSpace, void>::
+    SharedAllocationRecord(
+        const Kokkos::Experimental::NextSilicon &arg_exec_space,
+        const Kokkos::Experimental::NextSiliconSharedUVMSpace &arg_space,
+        const std::string &arg_label, const size_t arg_alloc_size,
+        const SharedAllocationRecord<void, void>::function_type arg_dealloc)
+    // Pass through allocated [ SharedAllocationHeader , user_memory ]
+    // Pass through deallocation function
+    : base_t(
+#ifdef KOKKOS_ENABLE_DEBUG
+          &SharedAllocationRecord<
+              Kokkos::Experimental::NextSiliconSharedUVMSpace,
+              void>::s_root_record,
+#endif
+          Impl::checked_allocation_with_header(arg_exec_space, arg_space,
+                                               arg_label, arg_alloc_size),
+          sizeof(SharedAllocationHeader) + arg_alloc_size, arg_dealloc,
+          arg_label),
+      m_space(arg_space) {
+  SharedAllocationHeader header;
+
+  this->base_t::_fill_host_accessible_header_info(header, arg_label);
+
+  Kokkos::Impl::DeepCopy<Experimental::NextSiliconSharedUVMSpace, HostSpace>(
+      arg_exec_space, RecordBase::m_alloc_ptr, &header,
+      sizeof(SharedAllocationHeader));
+}
+
 //==============================================================================
 // <editor-fold desc="Explicit instantiations of CRTP Base classes"> {{{1
 
@@ -103,6 +178,9 @@ Kokkos::Impl::SharedAllocationRecord<Kokkos::Experimental::NextSiliconSpace,
 // here, where we have access to the associated *_timpl.hpp header files.
 template class Kokkos::Impl::SharedAllocationRecordCommon<
     Kokkos::Experimental::NextSiliconSpace>;
+
+template class Kokkos::Impl::SharedAllocationRecordCommon<
+    Kokkos::Experimental::NextSiliconSharedUVMSpace>;
 
 // </editor-fold> end Explicit instantiations of CRTP Base classes }}}1
 //==============================================================================

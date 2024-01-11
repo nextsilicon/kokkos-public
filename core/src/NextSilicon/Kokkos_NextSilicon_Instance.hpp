@@ -23,11 +23,15 @@
 
 namespace Kokkos::Experimental::Impl {
 
+struct NextSiliconTraits {
+  static constexpr size_t BmtUseThreshold = 0x200 /* 512 bytes */;
+};
+
 class NextSiliconInternal {
   bool m_is_initialized = false;
 
-  NextSiliconInternal()                           = default;
-  NextSiliconInternal(const NextSiliconInternal&) = delete;
+  NextSiliconInternal()                                      = default;
+  NextSiliconInternal(const NextSiliconInternal&)            = delete;
   NextSiliconInternal& operator=(const NextSiliconInternal&) = delete;
 
  public:
