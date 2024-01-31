@@ -53,43 +53,31 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 
     if (__nsapi_is_on_cg()) {
       const auto num_iterations = end - begin;
-      uint32_t team_size        = __ns_optimal_team_size(
+      uint32_t team_size        = nsapi_team_get_optimal_size(
           reinterpret_cast<void*>(microtask), num_iterations);
 
-      void* team_handle = __ns_team_allocate(team_size);
-
-      uint32_t base_nsptid      = __ns_params_get_team_base(team_handle);
-      uint32_t actual_team_size = __ns_params_get_team_size(team_handle);
-
-      NSInvariantsScope scope_id = __ns_scope_invariants_create();
-
-      __ns_scope_invariants_enter(scope_id, &m_functor, base_nsptid,
-                                  actual_team_size, &m_policy);
-
-      // FIXME_NEXTSILICON: Use async version of `__ns_team_spawn` once it is
-      // available
-      __ns_team_spawn(team_handle, reinterpret_cast<void*>(microtask),
-                      &m_functor, base_nsptid, actual_team_size, &m_policy);
-
-      __ns_scope_invariants_leave(scope_id);
+      // FIXME_NEXTSILICON: Change function and policy capture to be more
+      // efficient.
+      nsapi_team_spawn(
+          reinterpret_cast<void*>(microtask), team_size, /* memory_size */ 0,
+          nsapi_team_dimensions{static_cast<uint64_t>(num_iterations)},
+          &m_functor, &m_policy);
     } else {
       // FIXME_NEXTSILICON Run microtask on host for training
       // for now run in serial.
-      microtask(&m_functor, /* base_nsptid */ 0, /* team_size */ 1, &m_policy);
+      microtask(&m_functor, &m_policy);
     }
   }
 
  private:
-// FIXME_NEXTSILICON Because there is no load on microtask / no training
-#pragma ns mark import_recursive
   __attribute__((noinline)) static void microtask(
-      FunctorWrapper const* __restrict functor, uint32_t base_nsptid,
-      uint32_t team_size, const Policy* policy) {
-    auto nsptid = []() -> uint32_t {
-      if (!__nsapi_is_on_cg()) return 0;
-      return __nsapi_get_ns_raw_tid();
-    }();
-    uint32_t thread_index = nsptid - base_nsptid;
+      FunctorWrapper const* __restrict functor, const Policy* policy) {
+    // TODO: On the device, the optimizer should turn those calls into
+    // invariants/feeders
+    // On host we're doing a serial for now, so the default values
+    // team_size = 1 and team_index = 0 are valid.
+    uint32_t thread_index = nsapi_team_get_thread_index();
+    uint32_t team_size    = nsapi_team_get_team_size();
 
     WorkRange range(*policy, thread_index, team_size);
     const auto ibeg = range.begin();
