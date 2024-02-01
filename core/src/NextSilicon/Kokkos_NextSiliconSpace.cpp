@@ -21,7 +21,6 @@
 #include <NextSilicon/Kokkos_NextSilicon.hpp>
 #include <NextSilicon/Kokkos_NextSiliconSpace.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_DeepCopy.hpp>
-#include <impl/Kokkos_MemorySpace.hpp>
 #include <impl/Kokkos_Profiling_Interface.hpp>
 
 namespace Kokkos {
