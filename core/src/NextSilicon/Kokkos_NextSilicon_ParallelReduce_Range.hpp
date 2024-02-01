@@ -115,20 +115,20 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
 };
 
 // FIXME_NEXTSILICON: handling of static vs dynamic schedule?
-#define KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_DISPATCH_SCHEDULE(REDUCER,     \
-                                                                  OPERATOR)    \
-  namespace Kokkos::Experimental::Impl {                                       \
-  template <class IndexType, class ValueType, class Functor, class Sch>        \
-  void NextSiliconParallelReduce##REDUCER(Sch, IndexType begin, IndexType end, \
-                                          ValueType& aval,                     \
-                                          Functor const& functor) {            \
-    auto val = aval;                                                           \
-    KOKKOS_IMPL_NS_PRAGMA(omp parallel for reduction(OPERATOR:val))            \
-    for (auto i = begin; i < end; i++) {                                       \
-      functor(i, val);                                                         \
-    }                                                                          \
-    aval = val;                                                                \
-  }                                                                            \
+#define KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_DISPATCH_SCHEDULE(REDUCER,  \
+                                                                  OPERATOR) \
+  namespace Kokkos::Experimental::Impl {                                    \
+  template <class IndexType, class ValueType, class Functor>                \
+  void NextSiliconParallelReduce##REDUCER(IndexType begin, IndexType end,   \
+                                          ValueType& aval,                  \
+                                          Functor const& functor) {         \
+    auto val = aval;                                                        \
+    KOKKOS_IMPL_NS_PRAGMA(omp parallel for reduction(OPERATOR:val))         \
+    for (auto i = begin; i < end; i++) {                                    \
+      functor(i, val);                                                      \
+    }                                                                       \
+    aval = val;                                                             \
+  }                                                                         \
   }  // namespace Kokkos::Experimental::Impl
 
 #define KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_HELPER(REDUCER, OPERATOR)      \
@@ -137,9 +137,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
   struct Kokkos::Experimental::Impl::NextSiliconParallelReduceHelper<          \
       Functor, Kokkos::REDUCER<Scalar, Space>, Kokkos::RangePolicy<Traits...>, \
       true> {                                                                  \
-    using Policy = RangePolicy<Traits...>;                                     \
-    using ScheduleType =                                                       \
-        Kokkos::Experimental::Impl::NextSiliconScheduleType<Policy>;           \
+    using Policy    = RangePolicy<Traits...>;                                  \
     using Reducer   = REDUCER<Scalar, Space>;                                  \
     using ValueType = typename Reducer::value_type;                            \
                                                                                \
@@ -156,10 +154,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
       ValueType val;                                                           \
       reducer.init(val);                                                       \
                                                                                \
-      int const chunk_size = policy.chunk_size();                              \
-                                                                               \
-      NextSiliconParallelReduce##REDUCER(ScheduleType(), chunk_size, begin,    \
-                                         end, val, functor);                   \
+      NextSiliconParallelReduce##REDUCER(begin, end, val, functor);            \
                                                                                \
       reducer.reference() = val;                                               \
     }                                                                          \
