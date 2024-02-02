@@ -114,25 +114,20 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
   }
 };
 
-// FIXME_NEXTSILICON: handling of static vs dynamic schedule?
-#define KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_DISPATCH_SCHEDULE(REDUCER,  \
-                                                                  OPERATOR) \
-  namespace Kokkos::Experimental::Impl {                                    \
-  template <class IndexType, class ValueType, class Functor>                \
-  void NextSiliconParallelReduce##REDUCER(IndexType begin, IndexType end,   \
-                                          ValueType& aval,                  \
-                                          Functor const& functor) {         \
-    auto val = aval;                                                        \
-    KOKKOS_IMPL_NS_PRAGMA(omp parallel for reduction(OPERATOR:val))         \
-    for (auto i = begin; i < end; i++) {                                    \
-      functor(i, val);                                                      \
-    }                                                                       \
-    aval = val;                                                             \
-  }                                                                         \
-  }  // namespace Kokkos::Experimental::Impl
-
 #define KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_HELPER(REDUCER, OPERATOR)      \
-  KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_DISPATCH_SCHEDULE(REDUCER, OPERATOR) \
+  namespace Kokkos::Experimental::Impl {                                       \
+  template <class IndexType, class ValueType, class Functor>                   \
+  void NextSiliconParallelReduce##REDUCER(IndexType begin, IndexType end,      \
+                                          ValueType& aval,                     \
+                                          Functor const& functor) {            \
+    auto val = aval;                                                           \
+    KOKKOS_IMPL_NS_PRAGMA(omp parallel for reduction(OPERATOR:val))            \
+    for (auto i = begin; i < end; i++) {                                       \
+      functor(i, val);                                                         \
+    }                                                                          \
+    aval = val;                                                                \
+  }                                                                            \
+  } /* namespace Kokkos::Experimental::Impl */                                 \
   template <class Functor, class Scalar, class Space, class... Traits>         \
   struct Kokkos::Experimental::Impl::NextSiliconParallelReduceHelper<          \
       Functor, Kokkos::REDUCER<Scalar, Space>, Kokkos::RangePolicy<Traits...>, \
@@ -171,6 +166,5 @@ KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_HELPER(BAnd, &);
 KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_HELPER(BOr, |);
 
 #undef KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_HELPER
-#undef KOKKOS_IMPL_NEXTSILICON_PARALLEL_REDUCE_DISPATCH_SCHEDULE
 
 #endif  // KOKKOS_NEXTSILICON_PARALLELREDUCE_RANGE_HPP
