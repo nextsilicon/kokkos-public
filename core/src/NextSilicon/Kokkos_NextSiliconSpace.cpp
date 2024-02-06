@@ -64,9 +64,15 @@ void *NextSiliconSpace::impl_allocate(
                 "Error sizeof(void*) != sizeof(uintptr_t)");
 
   void *ptr = nullptr;
-  ptr       = llns_memory_device_allocate(
+#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+  // FIXME_NEXTSILICON default to managed allocation instead of
+  // host pinned.
+  ptr = malloc(arg_alloc_size);
+#else
+  ptr = llns_memory_device_allocate(
       arg_alloc_size, /* loopref */ {}, /* cache_capacity */ {},
       /* hit_throughput */ {}, /* miss_throughput */ {});
+#endif
 
   if (Kokkos::Profiling::profileLibraryLoaded()) {
     const size_t reported_size =
@@ -101,7 +107,12 @@ void NextSiliconSpace::impl_deallocate(
   }
 
   if (arg_alloc_ptr) {
+#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+    // FIXME_NEXTSILICON Remove once new release is available
+    free(arg_alloc_ptr);
+#else
     llns_memory_free(arg_alloc_ptr);
+#endif
   }
 }
 

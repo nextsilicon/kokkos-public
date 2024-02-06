@@ -34,6 +34,10 @@ void DeepCopySharedNextSilicon(void* dst, const void* src, size_t n) {
 }
 
 void DeepCopyDeviceNextSilicon(void* dst, const void* src, size_t n) {
+#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+  // FIXME_NEXTSILICON fall back to regular memcpy if nsapi not available
+  std::memcpy(dst, src, n);
+#else
   if (n > Kokkos::Experimental::Impl::NextSiliconTraits::BmtUseThreshold) {
     llns_memory_device_copy_bmt(dst, src, n);
   } else if (__nsapi_is_on_cg()) {
@@ -41,6 +45,7 @@ void DeepCopyDeviceNextSilicon(void* dst, const void* src, size_t n) {
   } else {
     std::memcpy(dst, src, n);
   }
+#endif
 }
 
 }  // namespace Impl

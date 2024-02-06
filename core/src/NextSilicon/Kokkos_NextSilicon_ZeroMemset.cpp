@@ -29,6 +29,10 @@
 namespace Kokkos {
 namespace Impl {
 void ZeroMemsetNextSilicon(void* buffer, size_t buffer_size) {
+#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+  // FIXME_NEXTSILICON delete once new nsapi are delivered
+  std::memset(buffer, 0, buffer_size);
+#else
   auto fill_alignment =
       Kokkos::Experimental::Impl::NextSiliconTraits::FillAlignmend;
   if (buffer_size % fill_alignment != 0 ||
@@ -43,6 +47,7 @@ void ZeroMemsetNextSilicon(void* buffer, size_t buffer_size) {
     uint64_t pattern = 0;
     llns_memory_device_fill_rma(buffer, pattern, sizeof(pattern), buffer_size);
   }
+#endif
 }
 
 }  // namespace Impl
