@@ -51,6 +51,15 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 
     if (end <= begin) return;
 
+#ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
+
+#pragma omp parallel for
+    for (auto i = begin; i < end; ++i) {
+      m_functor(i);
+    }
+
+#else
+
     if (__nsapi_is_on_cg()) {
       const auto num_iterations = end - begin;
       uint32_t team_size        = nsapi_team_get_optimal_size(
@@ -67,7 +76,10 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
       // for now run in serial.
       microtask(&m_functor, &m_policy);
     }
+#endif
   }
+
+#ifndef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 
  private:
   __attribute__((noinline)) static void microtask(
@@ -89,6 +101,7 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
       (*functor)(i);
     }
   }
+#endif
 };
 
 #endif  // KOKKOS_NEXTSILICON_PARALLELFOR_RANGE_HPP
