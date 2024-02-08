@@ -540,6 +540,19 @@ static constexpr bool kokkos_omp_on_host() { return false; }
 #endif
 #endif
 
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+// FIXME_NEXTSILICON __nsapi_is_on_cg is not constexpr causing compile warnings
+#include <nsapi/intrinsics.h>
+#define KOKKOS_IF_ON_DEVICE(CODE) \
+  if (__nsapi_is_on_cg()) {   \
+    KOKKOS_IMPL_STRIP_PARENS(CODE) \
+  }
+#define KOKKOS_IF_ON_HOST(CODE) \
+  if (!__nsapi_is_on_cg()) {   \
+    KOKKOS_IMPL_STRIP_PARENS(CODE) \
+  }
+#endif
+
 #if !defined(KOKKOS_IF_ON_HOST) && !defined(KOKKOS_IF_ON_DEVICE)
 #if (defined(KOKKOS_ENABLE_CUDA) && defined(__CUDA_ARCH__)) ||         \
     (defined(KOKKOS_ENABLE_HIP) && defined(__HIP_DEVICE_COMPILE__)) || \

@@ -28,6 +28,9 @@
 #ifdef KOKKOS_ENABLE_SYCL
 #include <SYCL/Kokkos_SYCL_Abort.hpp>
 #endif
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+#include <NextSilicon/Kokkos_NextSilicon_Abort.hpp>
+#endif
 
 namespace Kokkos {
 namespace Impl {
@@ -74,7 +77,7 @@ namespace Impl {
 
 #if defined(KOKKOS_ENABLE_CUDA) || defined(KOKKOS_ENABLE_HIP) ||          \
     defined(KOKKOS_ENABLE_SYCL) || defined(KOKKOS_ENABLE_OPENMPTARGET) || \
-    defined(KOKKOS_ENABLE_OPENACC)
+    defined(KOKKOS_ENABLE_OPENACC) || defined(KOKKOS_ENABLE_NEXTSILICON)
 KOKKOS_IMPL_ABORT_NORETURN_DEVICE inline KOKKOS_IMPL_DEVICE_FUNCTION void
 device_abort(const char *const msg) {
 #if defined(KOKKOS_ENABLE_CUDA)
@@ -83,6 +86,8 @@ device_abort(const char *const msg) {
   ::Kokkos::Impl::hip_abort(msg);
 #elif defined(KOKKOS_ENABLE_SYCL)
   ::Kokkos::Impl::sycl_abort(msg);
+#elif defined(KOKKOS_ENABLE_NEXTSILICON)
+  ::Kokkos::Impl::nextsilicon_abort(msg);
 #elif defined(KOKKOS_ENABLE_OPENMPTARGET) || defined(KOKKOS_ENABLE_OPENACC)
   printf("%s", msg);  // FIXME_OPENMPTARGET FIXME_OPENACC
 #else
