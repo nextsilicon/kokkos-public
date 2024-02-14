@@ -20,7 +20,7 @@
 #include <NextSilicon/Kokkos_NextSilicon_DeepCopy.hpp>
 #include <impl/Kokkos_SharedAlloc_timpl.hpp>
 
-KOKKOS_IMPL_HOST_INACCESSIBLE_SHARED_ALLOCATION_RECORD_EXPLICIT_INSTANTIATION(
+KOKKOS_IMPL_SHARED_ALLOCATION_RECORD_EXPLICIT_INSTANTIATION(
     Kokkos::Experimental::NextSiliconSpace);
 KOKKOS_IMPL_SHARED_ALLOCATION_RECORD_EXPLICIT_INSTANTIATION(
-    Kokkos::Experimental::NextSiliconSharedUVMSpace);
+    Kokkos::Experimental::NextSiliconManagedSpace);

@@ -160,11 +160,14 @@ static_assert(Kokkos::Impl::MemorySpaceAccess<
 // NextSiliconSpace::execution_space can always access and assign Host memory.
 // NextSiliconManagedSpace accessible and assignable from everywhere.
 
+// FIXME_NEXTSILICON Set Device space to be assignable and accessible from
+//  host space (which is slow but works without a fault) because of missing
+//  constepxr KOKKOS_IF_ON_DEVICE / KOKKOS_IF_ON_HOST
 template <>
 struct MemorySpaceAccess<Kokkos::HostSpace,
                          Kokkos::Experimental::NextSiliconSpace> {
-  enum : bool { assignable = false };
-  enum : bool { accessible = false };
+  enum : bool { assignable = true };
+  enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
 

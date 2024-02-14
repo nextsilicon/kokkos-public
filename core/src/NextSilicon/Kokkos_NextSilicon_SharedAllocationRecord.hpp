@@ -20,9 +20,9 @@
 #include <NextSilicon/Kokkos_NextSiliconSpace.hpp>
 #include <impl/Kokkos_SharedAlloc.hpp>
 
-KOKKOS_IMPL_HOST_INACCESSIBLE_SHARED_ALLOCATION_SPECIALIZATION(
+KOKKOS_IMPL_SHARED_ALLOCATION_SPECIALIZATION(
     Kokkos::Experimental::NextSiliconSpace);
 KOKKOS_IMPL_SHARED_ALLOCATION_SPECIALIZATION(
-    Kokkos::Experimental::NextSiliconSharedUVMSpace);
+    Kokkos::Experimental::NextSiliconManagedSpace);
 
 #endif
