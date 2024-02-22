@@ -63,7 +63,7 @@ else()
   set(KOKKOS_OPENACC_FEATURE_LEVEL 17)
 endif()
 
-SET(KOKKOS_NEXTSILICON_FEATURE_LEVEL 5)
+SET(KOKKOS_NEXTSILICON_FEATURE_LEVEL 8)
 SET(KOKKOS_NEXTSILICON_NAME Experimental::NextSilicon)
 
 set(KOKKOS_OPENACC_NAME Experimental::OpenACC)
@@ -691,13 +691,6 @@ IF(KOKKOS_ENABLE_NEXTSILICON)
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CommonPolicyConstructors.cpp # FIXME_NEXTSILICON: needs team policy
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_Abort.cpp # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CheckedIntegerOps.cpp # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
-  )
-  # FIXME_NEXTSILICON: needs MDRange policty
-  list(REMOVE_ITEM Serial_SOURCES2
-    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewAPI_c.cpp
-    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewCtorDimMatch.cpp # hang (ASSERT_DEATH?)
-    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewLayoutStrideAssignment.cpp # hang (ASSERT_DEATH?)
-    ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_ViewMemoryAccessViolation.cpp # hang (ASSERT_DEATH?)
   )
 endif()
 
