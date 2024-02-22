@@ -462,7 +462,7 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateLeft, Functor const& functor,
     NextSiliconMDRangeBegin<2> const& begin,
     NextSiliconMDRangeEnd<2> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
                                                        Functor, 2>(functor,
@@ -474,7 +474,7 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateRight, Functor const& functor,
     NextSiliconMDRangeBegin<2> const& begin,
     NextSiliconMDRangeEnd<2> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
                                                        Functor, 2>(functor,
@@ -486,7 +486,7 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateLeft, Functor const& functor,
     NextSiliconMDRangeBegin<3> const& begin,
     NextSiliconMDRangeEnd<3> const& end) {
-  const size_t flat =
+  const auto flat =
       (end[0] - begin[0]) * (end[1] - begin[1]) * (end[2] - begin[2]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
@@ -499,7 +499,7 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateRight, Functor const& functor,
     NextSiliconMDRangeBegin<3> const& begin,
     NextSiliconMDRangeEnd<3> const& end) {
-  const size_t flat =
+  const auto flat =
       (end[0] - begin[0]) * (end[1] - begin[1]) * (end[2] - begin[2]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
@@ -512,8 +512,8 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateLeft, Functor const& functor,
     NextSiliconMDRangeBegin<4> const& begin,
     NextSiliconMDRangeEnd<4> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                      (end[2] - begin[2]) * (end[3] - begin[3]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
+                    (end[2] - begin[2]) * (end[3] - begin[3]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
                                                        Functor, 4>(functor,
@@ -525,8 +525,8 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateRight, Functor const& functor,
     NextSiliconMDRangeBegin<4> const& begin,
     NextSiliconMDRangeEnd<4> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                      (end[2] - begin[2]) * (end[3] - begin[3]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
+                    (end[2] - begin[2]) * (end[3] - begin[3]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
                                                        Functor, 4>(functor,
@@ -538,9 +538,9 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateLeft, Functor const& functor,
     NextSiliconMDRangeBegin<5> const& begin,
     NextSiliconMDRangeEnd<5> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                      (end[2] - begin[2]) * (end[3] - begin[3]) *
-                      (end[4] - begin[4]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
+                    (end[2] - begin[2]) * (end[3] - begin[3]) *
+                    (end[4] - begin[4]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
                                                        Functor, 5>(functor,
@@ -552,9 +552,9 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateRight, Functor const& functor,
     NextSiliconMDRangeBegin<5> const& begin,
     NextSiliconMDRangeEnd<5> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                      (end[2] - begin[2]) * (end[3] - begin[3]) *
-                      (end[4] - begin[4]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
+                    (end[2] - begin[2]) * (end[3] - begin[3]) *
+                    (end[4] - begin[4]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
                                                        Functor, 5>(functor,
@@ -566,9 +566,9 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateLeft, Functor const& functor,
     NextSiliconMDRangeBegin<6> const& begin,
     NextSiliconMDRangeEnd<6> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                      (end[2] - begin[2]) * (end[3] - begin[3]) *
-                      (end[4] - begin[4]) * (end[5] - begin[5]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
+                    (end[2] - begin[2]) * (end[3] - begin[3]) *
+                    (end[4] - begin[4]) * (end[5] - begin[5]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
                                                        Functor, 6>(functor,
@@ -580,9 +580,9 @@ void NextSiliconParallelForMDRangePolicy(
     NextSiliconIterateRight, Functor const& functor,
     NextSiliconMDRangeBegin<6> const& begin,
     NextSiliconMDRangeEnd<6> const& end) {
-  const size_t flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                      (end[2] - begin[2]) * (end[3] - begin[3]) *
-                      (end[4] - begin[4]) * (end[5] - begin[5]);
+  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
+                    (end[2] - begin[2]) * (end[3] - begin[3]) *
+                    (end[4] - begin[4]) * (end[5] - begin[5]);
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
                                                        Functor, 6>(functor,
