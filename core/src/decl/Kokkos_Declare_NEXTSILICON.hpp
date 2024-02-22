@@ -25,6 +25,8 @@
 #include <NextSilicon/Kokkos_NextSilicon_SharedAllocationRecord.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelFor_Range.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelReduce_Range.hpp>
+#include <NextSilicon/Kokkos_NextSilicon_MDRangePolicy.hpp>
+#include <NextSilicon/Kokkos_NextSilicon_ParallelFor_MDRange.hpp>
 #endif
 
 #endif
