@@ -34,7 +34,7 @@ void DeepCopySharedNextSilicon(void* dst, const void* src, size_t n) {
 }
 
 void DeepCopyDeviceNextSilicon(void* dst, const void* src, size_t n) {
-#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+#ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
   // FIXME_NEXTSILICON fall back to regular memcpy if nsapi not available
   std::memcpy(dst, src, n);
 #else

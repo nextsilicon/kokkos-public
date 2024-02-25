@@ -87,6 +87,7 @@ KOKKOS_INTERNAL_CUDA_USE_LAMBDA := $(call kokkos_has_string,$(KOKKOS_CUDA_OPTION
 KOKKOS_INTERNAL_CUDA_USE_CONSTEXPR := $(call kokkos_has_string,$(KOKKOS_CUDA_OPTIONS),enable_constexpr)
 KOKKOS_INTERNAL_CUDA_ENABLE_MALLOC_ASYNC := $(call kokkos_has_string,$(KOKKOS_CUDA_OPTIONS),enable_malloc_async)
 KOKKOS_INTERNAL_HPX_ENABLE_ASYNC_DISPATCH := $(call kokkos_has_string,$(KOKKOS_HPX_OPTIONS),enable_async_dispatch)
+KOKKOS_INTERNAL_NEXTSILICON_NSAPI_UNAVAIL := $(call kokkos_has_string,$(KOKKOS_NEXTSILICON_OPTIONS),nsapi_unavail)
 # deprecated
 KOKKOS_INTERNAL_ENABLE_DESUL_ATOMICS := $(call kokkos_has_string,$(KOKKOS_OPTIONS),enable_desul_atomics)
 # deprecated
@@ -119,6 +120,7 @@ KOKKOS_INTERNAL_USE_HIP := $(call kokkos_has_string,$(KOKKOS_DEVICES),HIP)
 KOKKOS_INTERNAL_USE_SYCL := $(call kokkos_has_string,$(KOKKOS_DEVICES),SYCL)
 KOKKOS_INTERNAL_USE_OPENMPTARGET := $(call kokkos_has_string,$(KOKKOS_DEVICES),OpenMPTarget)
 KOKKOS_INTERNAL_USE_OPENACC := $(call kokkos_has_string,$(KOKKOS_DEVICES),OpenACC)
+KOKKOS_INTERNAL_USE_NEXTSILICON := $(call kokkos_has_string,$(KOKKOS_DEVICES),NextSilicon)
 
 KOKKOS_DEVICELIST =
 ifeq ($(KOKKOS_INTERNAL_USE_SERIAL), 1)
@@ -751,6 +753,14 @@ endif
 ifeq ($(KOKKOS_INTERNAL_USE_HPX), 1)
   ifeq ($(KOKKOS_INTERNAL_HPX_ENABLE_ASYNC_DISPATCH), 1)
     tmp := $(call kokkos_append_header,"$H""define KOKKOS_ENABLE_IMPL_HPX_ASYNC_DISPATCH")
+  endif
+endif
+
+ifeq ($(KOKKOS_INTERNAL_USE_NEXTSILICON), 1)
+  ifeq($(KOKKOS_INTERNAL_NEXTSILICON_NSAPI_UNAVAIL), 1)
+    tmp := $(call kokkos_append_header,"$H""define KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL")
+  else
+    tmp := $(call kokkos_append_header,"/* $H""undef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL */")
   endif
 endif
 

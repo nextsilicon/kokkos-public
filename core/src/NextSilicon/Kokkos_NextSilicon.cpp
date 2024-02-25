@@ -40,8 +40,21 @@ bool Kokkos::Experimental::NextSilicon::impl_is_initialized() {
 }
 
 void Kokkos::Experimental::NextSilicon::print_configuration(
-    std::ostream& os, bool verbose) const {
-  m_space_instance->print_configuration(os, verbose);
+    std::ostream& os, bool /* verbose */) const {
+  os << "Device Execuction Space:\n";
+  os << "  KOKKOS_ENABLE_NEXTSILICON: yes\n";
+
+  os << "NextSilicon Options:\n";
+  os << "  KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL: ";
+#ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
+  os << "yes\n";
+#else
+  os << "no\n";
+#endif
+
+  os << "\nNextSilicon Runtime Configuration:\n";
+
+  m_space_instance->print_configuration(os);
 }
 
 void Kokkos::Experimental::NextSilicon::fence(std::string const& name) const {

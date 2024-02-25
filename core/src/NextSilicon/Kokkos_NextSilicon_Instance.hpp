@@ -44,7 +44,7 @@ class NextSiliconInternal {
   void finalize();
   bool is_initialized() const;
 
-  void print_configuration(std::ostream& os, bool verbose = false) const;
+  void print_configuration(std::ostream& os) const;
 
   void fence(std::string const& name) const;
 

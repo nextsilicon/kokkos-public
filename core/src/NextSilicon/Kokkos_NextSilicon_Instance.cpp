@@ -41,12 +41,12 @@ bool Kokkos::Experimental::Impl::NextSiliconInternal::is_initialized() const {
 }
 
 void Kokkos::Experimental::Impl::NextSiliconInternal::print_configuration(
-    std::ostream& os, bool verbose) const {
-  // FIXME_NEXTSILICON print_configuration doesn't do anything useful
-  os << "Using NextSilicon\n";
-  if (verbose) {
-    os << "\t in verbose mode!";
-  }
+    std::ostream& os) const {
+#if defined(KOKKOS_ENABLE_NEXTSILICON)
+  os << "macro  KOKKOS_ENABLE_NEXTSILICON      : defined\n";
+#endif
+  // FIXME_NEXTSILICON print_configuration doesn't do anything useful, fix
+  // once device properties nsapi is available
 }
 
 void Kokkos::Experimental::Impl::NextSiliconInternal::fence(

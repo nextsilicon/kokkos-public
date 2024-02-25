@@ -64,7 +64,7 @@ void *NextSiliconSpace::impl_allocate(
                 "Error sizeof(void*) != sizeof(uintptr_t)");
 
   void *ptr = nullptr;
-#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+#ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
   // FIXME_NEXTSILICON default to managed allocation instead of
   // host pinned.
   ptr = malloc(arg_alloc_size);
@@ -107,7 +107,7 @@ void NextSiliconSpace::impl_deallocate(
   }
 
   if (arg_alloc_ptr) {
-#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+#ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
     // FIXME_NEXTSILICON Remove once new release is available
     free(arg_alloc_ptr);
 #else

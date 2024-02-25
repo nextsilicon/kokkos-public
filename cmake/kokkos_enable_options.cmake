@@ -136,6 +136,8 @@ else()
 endif()
 kokkos_enable_option(IMPL_HPX_ASYNC_DISPATCH ${HPX_ASYNC_DISPATCH_DEFAULT} "Whether HPX supports asynchronous dispatch")
 
+kokkos_enable_option(IMPL_NSAPI_UNAVAIL OFF "Whether new NSAPI version is available or not")
+
 kokkos_enable_option(UNSUPPORTED_ARCHS OFF "Whether to allow architectures in backends Kokkos doesn't optimize for")
 
 function(check_device_specific_options)
@@ -178,6 +180,7 @@ check_device_specific_options(
 )
 check_device_specific_options(DEVICE HPX OPTIONS IMPL_HPX_ASYNC_DISPATCH)
 check_device_specific_options(DEVICE OPENACC OPTIONS OPENACC_FORCE_HOST_AS_DEVICE)
+check_device_specific_options(DEVICE NEXTSILICON OPTIONS IMPL_NSAPI_UNAVAIL)
 
 # Needed due to change from deprecated name to new header define name
 if(KOKKOS_ENABLE_AGGRESSIVE_VECTORIZATION)

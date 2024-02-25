@@ -29,7 +29,7 @@
 namespace Kokkos {
 namespace Impl {
 void ZeroMemsetNextSilicon(void* buffer, size_t buffer_size) {
-#ifdef KOKKOS_IMPL_NSAPI_UNAVAIL
+#ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
   // FIXME_NEXTSILICON delete once new nsapi are delivered
   std::memset(buffer, 0, buffer_size);
 #else
