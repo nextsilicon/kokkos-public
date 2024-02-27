@@ -23,6 +23,7 @@
 #include <Kokkos_Parallel.hpp>
 
 #include <type_traits>
+#include <utility>
 
 namespace Kokkos::Experimental::Impl {
 
@@ -52,413 +53,75 @@ KOKKOS_INLINE_FUNCTION Div<Integral> divmod(Integral x, Integral y) {
   return {x / y, x % y};
 }
 
-template <typename Iterate, typename Functor, int Dim>
+template <typename Direction, typename Functor, int Dim>
 class NextSiliconParallelForMDRangePolicyFunctor {
+ public:
   NextSiliconParallelForMDRangePolicyFunctor(
       Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
-      NextSiliconMDRangeEnd<Dim> const& end);
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                 Functor, 2> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<2> const& begin,
-      NextSiliconMDRangeEnd<2> const& end)
+      NextSiliconMDRangeEnd<Dim> const& end)
       : functor_(functor),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
+        begin_(begin) {
+          for (int i = 0; i < Dim; ++i) {
+            ext_[i] = end[i] - begin[i];
+          }
+        }
 
-  // a.k.a
-  // for (auto i1 = begin1; i1 < end1; ++i1) {
-  //   for (auto i0 = begin0; i0 < end0; ++i0) {
-  //     functor(i0, i1);
-  //   }
-  // }
+
   void operator()(const int i) const {
-    auto [i1, i0] = divmod(i, ext0_);
-    functor_(i0 + begin0_, i1 + begin1_);
+    int x[Dim];
+    map(i, x);
+    call_functor(std::make_index_sequence<Dim>() /* 0, 1, ..., Dim */, x);
   }
 
  private:
-  Functor functor_;
-  int begin1_, begin0_;
-  int ext1_, ext0_;
-};
 
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                 Functor, 2> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<2> const& begin,
-      NextSiliconMDRangeEnd<2> const& end)
-      : functor_(functor),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i0 = begin0; i0 < end0; ++i0) {
-  //   for (auto i1 = begin1; i1 < end1; ++i1) {
-  //     functor(i0, i1);
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [i0, i1] = divmod(i, ext1_);
-    functor_(i0 + begin0_, i1 + begin1_);
+  // call the functor on a Dim-dimensional index
+  template <size_t... I>
+  void call_functor(std::index_sequence<I...>, const int (&x)[Dim]) const {
+    functor_(x[I]...);
   }
 
- private:
-  Functor functor_;
-  int begin1_;
-  int begin0_;
-  int ext1_;
-  int ext0_;
-};
+  void map(int i, int (&x)[Dim]) const {
 
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                 Functor, 3> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<3> const& begin,
-      NextSiliconMDRangeEnd<3> const& end)
-      : functor_(functor),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
+    if constexpr (std::is_same_v<Direction, NextSiliconIterateLeft>) {
 
-  // a.k.a
-  // for (auto i2 = begin2; i2 < end2; ++i2) {
-  //   for (auto i1 = begin1; i1 < end1; ++i1) {
-  //     for (auto i0 = begin0; i0 < end0; ++i0) {
-  //       functor(i0, i1, i2);
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i1, i0] = divmod(i, ext0_);
-    auto [i2, i1]  = divmod(_i1, ext1_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_);
+      // like
+      // for (auto i2 = begin2; i2 < end2; ++i2) {
+      //   for (auto i1 = begin1; i1 < end1; ++i1) {
+      //     for (auto i0 = begin0; i0 < end0; ++i0) {
+      //       ...
+      //     }
+      //   }
+      // }
+      for (int j = 0; j < Dim; ++j) {
+        auto r = std::div(i, ext_[j]);
+        x[j] = begin_[j] + r.rem;
+        i = r.quot;
+      }
+    } else if constexpr (std::is_same_v<Direction, NextSiliconIterateRight>) {
+
+      // like
+      // for (auto i0 = begin0; i0 < end0; ++i0) {
+      //   for (auto i1 = begin1; i1 < end1; ++i1) {
+      //     for (auto i2 = begin2; i2 < end2; ++i2) {
+      //       ...
+      //     }
+      //   }
+      // }
+      for (int j = Dim - 1; j >= 0; --j) {
+        auto r = std::div(i, ext_[j]);
+        x[j] = begin_[j] + r.rem;
+        i = r.quot;
+      }
+    } else {
+      static_assert(std::is_void_v<Functor>, "Expected NextSiliconIterateLeft or NextSiliconIterateRight");
+    }
   }
 
- private:
   Functor functor_;
-  int begin2_, begin1_, begin0_;
-  int ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                 Functor, 3> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<3> const& begin,
-      NextSiliconMDRangeEnd<3> const& end)
-      : functor_(functor),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i0 = begin0; i0 < end0; ++i0) {
-  //   for (auto i1 = begin1; i1 < end1; ++i1) {
-  //     for (auto i2 = begin2; i2 < end2; ++i2) {
-  //       functor(i0, i1, i2);
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i1, i2] = divmod(i, ext2_);
-    auto [i0, i1]  = divmod(_i1, ext1_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_);
-  }
-
- private:
-  Functor functor_;
-  int begin2_, begin1_, begin0_;
-  int ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                 Functor, 4> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<4> const& begin,
-      NextSiliconMDRangeEnd<4> const& end)
-      : functor_(functor),
-        begin3_(begin[3]),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext3_(end[3] - begin[3]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i3 = begin3; i3 < end3; ++i3) {
-  //   for (auto i2 = begin2; i2 < end2; ++i2) {
-  //     for (auto i1 = begin1; i1 < end1; ++i1) {
-  //       for (auto i0 = begin0; i0 < end0; ++i0) {
-  //         functor(i0, i1, i2, i3);
-  //       }
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i1, i0] = divmod(i, ext0_);
-    auto [_i2, i1] = divmod(_i1, ext1_);
-    auto [i3, i2]  = divmod(_i2, ext2_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_, i3 + begin3_);
-  }
-
- private:
-  Functor functor_;
-  int begin3_, begin2_, begin1_, begin0_;
-  int ext3_, ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                 Functor, 4> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<4> const& begin,
-      NextSiliconMDRangeEnd<4> const& end)
-      : functor_(functor),
-        begin3_(begin[3]),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext3_(end[3] - begin[3]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i0 = begin0; i0 < end0; ++i0) {
-  //   for (auto i1 = begin1; i1 < end1; ++i1) {
-  //     for (auto i2 = begin2; i2 < end2; ++i2) {
-  //       for (auto i3 = begin3; i3 < end3; ++i3) {
-  //         functor(i0, i1, i2, i3);
-  //       }
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i2, i3] = divmod(i, ext3_);
-    auto [_i1, i2] = divmod(_i2, ext2_);
-    auto [i0, i1]  = divmod(_i1, ext1_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_, i3 + begin3_);
-  }
-
- private:
-  Functor functor_;
-  int begin3_, begin2_, begin1_, begin0_;
-  int ext3_, ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                 Functor, 5> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<5> const& begin,
-      NextSiliconMDRangeEnd<5> const& end)
-      : functor_(functor),
-        begin4_(begin[4]),
-        begin3_(begin[3]),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext4_(end[4] - begin[4]),
-        ext3_(end[3] - begin[3]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i4 = begin4; i4 < end4; ++i4) {
-  //   for (auto i3 = begin3; i3 < end3; ++i3) {
-  //     for (auto i2 = begin2; i2 < end2; ++i2) {
-  //       for (auto i1 = begin1; i1 < end1; ++i1) {
-  //         for (auto i0 = begin0; i0 < end0; ++i0) {
-  //           functor(i0, i1, i2, i3, i4);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i1, i0] = divmod(i, ext0_);
-    auto [_i2, i1] = divmod(_i1, ext1_);
-    auto [_i3, i2] = divmod(_i2, ext2_);
-    auto [i4, i3]  = divmod(_i3, ext3_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_, i3 + begin3_,
-             i4 + begin4_);
-  }
-
- private:
-  Functor functor_;
-  int begin4_, begin3_, begin2_, begin1_, begin0_;
-  int ext4_, ext3_, ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                 Functor, 5> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<5> const& begin,
-      NextSiliconMDRangeEnd<5> const& end)
-      : functor_(functor),
-        begin4_(begin[4]),
-        begin3_(begin[3]),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext4_(end[4] - begin[4]),
-        ext3_(end[3] - begin[3]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i0 = begin0; i0 < end0; ++i0) {
-  //   for (auto i1 = begin1; i1 < end1; ++i1) {
-  //     for (auto i2 = begin2; i2 < end2; ++i2) {
-  //       for (auto i3 = begin3; i3 < end3; ++i3) {
-  //         for (auto i4 = begin4; i4 < end4; ++i4) {
-  //           functor(i0, i1, i2, i3, i4);
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i3, i4] = divmod(i, ext4_);
-    auto [_i2, i3] = divmod(_i3, ext3_);
-    auto [_i1, i2] = divmod(_i2, ext2_);
-    auto [i0, i1]  = divmod(_i1, ext1_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_, i3 + begin3_,
-             i4 + begin4_);
-  }
-
- private:
-  Functor functor_;
-  int begin4_, begin3_, begin2_, begin1_, begin0_;
-  int ext4_, ext3_, ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                 Functor, 6> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<5> const& begin,
-      NextSiliconMDRangeEnd<5> const& end)
-      : functor_(functor),
-        begin4_(begin[4]),
-        begin3_(begin[3]),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext4_(end[4] - begin[4]),
-        ext3_(end[3] - begin[3]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i5 = begin5; i5 < end5; ++i5) {
-  //   for (auto i4 = begin4; i4 < end4; ++i4) {
-  //     for (auto i3 = begin3; i3 < end3; ++i3) {
-  //       for (auto i2 = begin2; i2 < end2; ++i2) {
-  //         for (auto i1 = begin1; i1 < end1; ++i1) {
-  //           for (auto i0 = begin0; i0 < end0; ++i0) {
-  //             functor(i0, i1, i2, i3, i4, i5);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i1, i0] = divmod(i, ext0_);
-    auto [_i2, i1] = divmod(_i1, ext1_);
-    auto [_i3, i2] = divmod(_i2, ext2_);
-    auto [_i4, i3] = divmod(_i3, ext3_);
-    auto [i5, i4]  = divmod(_i4, ext4_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_, i3 + begin3_,
-             i4 + begin4_, i5 + begin5_);
-  }
-
- private:
-  Functor functor_;
-  int begin5_, begin4_, begin3_, begin2_, begin1_, begin0_;
-  int ext5_, ext4_, ext3_, ext2_, ext1_, ext0_;
-};
-
-template <typename Functor>
-class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                 Functor, 6> {
- public:
-  NextSiliconParallelForMDRangePolicyFunctor(
-      Functor const& functor, NextSiliconMDRangeBegin<5> const& begin,
-      NextSiliconMDRangeEnd<5> const& end)
-      : functor_(functor),
-        begin4_(begin[4]),
-        begin3_(begin[3]),
-        begin2_(begin[2]),
-        begin1_(begin[1]),
-        begin0_(begin[0]),
-        ext4_(end[4] - begin[4]),
-        ext3_(end[3] - begin[3]),
-        ext2_(end[2] - begin[2]),
-        ext1_(end[1] - begin[1]),
-        ext0_(end[0] - begin[0]) {}
-
-  // a.k.a
-  // for (auto i0 = begin0; i0 < end0; ++i0) {
-  //   for (auto i1 = begin1; i1 < end1; ++i1) {
-  //     for (auto i2 = begin2; i2 < end2; ++i2) {
-  //       for (auto i3 = begin3; i3 < end3; ++i3) {
-  //         for (auto i4 = begin4; i4 < end4; ++i4) {
-  //           for (auto i5 = begin5; i5 < end5; ++i5) {
-  //             functor(i0, i1, i2, i3, i4, i5);
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  void operator()(const int i) const {
-    auto [_i4, i5] = divmod(i, ext5_);
-    auto [_i3, i4] = divmod(_i4, ext4_);
-    auto [_i2, i3] = divmod(_i3, ext3_);
-    auto [_i1, i2] = divmod(_i2, ext2_);
-    auto [i0, i1]  = divmod(_i1, ext1_);
-    functor_(i0 + begin0_, i1 + begin1_, i2 + begin2_, i3 + begin3_,
-             i4 + begin4_, i5 + begin5_);
-  }
-
- private:
-  Functor functor_;
-  int begin5_, begin4_, begin3_, begin2_, begin1_, begin0_;
-  int ext5_, ext4_, ext3_, ext2_, ext1_, ext0_;
+  NextSiliconMDRangeBegin<Dim> begin_;
+  int ext_[Dim]; // end - begin
+  int x_[Dim];
 };
 
 template <typename Direction, int Dim, class Functor>
