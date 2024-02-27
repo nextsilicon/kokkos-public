@@ -485,12 +485,13 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::MDRangePolicy<Traits...>,
 
  public:
   ParallelFor(Functor const& functor, Policy const& policy)
-      : m_functor(functor), m_policy(policy) {}
-
-  void execute() const {
+      : m_functor(functor), m_policy(policy) {
     static_assert(1 < Policy::rank && Policy::rank < 7);
     static_assert(Policy::inner_direction == Iterate::Left ||
                   Policy::inner_direction == Iterate::Right);
+  }
+
+  void execute() const {
     constexpr int rank = Policy::rank;
     for (int i = 0; i < rank; ++i) {
       if (m_policy.m_lower[i] >= m_policy.m_upper[i]) {
