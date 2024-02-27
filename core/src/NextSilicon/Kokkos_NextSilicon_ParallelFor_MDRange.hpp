@@ -22,6 +22,8 @@
 #include <NextSilicon/Kokkos_NextSilicon_MDRangePolicy.hpp>
 #include <Kokkos_Parallel.hpp>
 
+#include <type_traits>
+
 namespace Kokkos::Experimental::Impl {
 
 using NextSiliconIterateLeft  = std::integral_constant<Iterate, Iterate::Left>;
@@ -37,14 +39,16 @@ using NextSiliconMDRangeTile =
     decltype(MDRangePolicy<NextSilicon, Rank<N>>::m_tile);
 
 // a la std::div_t
-template <typename T>
+template <typename Integral>
 struct Div {
-  T quot;
-  T rem;
+  Integral quot;
+  Integral rem;
 };
 
-template <typename T>
-KOKKOS_INLINE_FUNCTION Div<T> divmod(T x, T y) {
+template <typename Integral>
+KOKKOS_INLINE_FUNCTION Div<Integral> divmod(Integral x, Integral y) {
+  static_assert(std::is_integral_v<Integral>,
+                "divmod operands must be integers");
   return {x / y, x % y};
 }
 
