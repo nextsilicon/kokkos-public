@@ -461,136 +461,17 @@ class NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
   int ext5_, ext4_, ext3_, ext2_, ext1_, ext0_;
 };
 
-template <class Functor>
+template <typename Direction, int Dim, class Functor>
 void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateLeft, Functor const& functor,
-    NextSiliconMDRangeBegin<2> const& begin,
-    NextSiliconMDRangeEnd<2> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]);
+    Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
+    NextSiliconMDRangeEnd<Dim> const& end) {
+  auto flat = end[0] - begin[0];
+  for (int i = 1; i < Dim; ++i) {
+    flat *= end[i] - begin[i];
+  }
   Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                       Functor, 2>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateRight, Functor const& functor,
-    NextSiliconMDRangeBegin<2> const& begin,
-    NextSiliconMDRangeEnd<2> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                       Functor, 2>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateLeft, Functor const& functor,
-    NextSiliconMDRangeBegin<3> const& begin,
-    NextSiliconMDRangeEnd<3> const& end) {
-  const auto flat =
-      (end[0] - begin[0]) * (end[1] - begin[1]) * (end[2] - begin[2]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                       Functor, 3>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateRight, Functor const& functor,
-    NextSiliconMDRangeBegin<3> const& begin,
-    NextSiliconMDRangeEnd<3> const& end) {
-  const auto flat =
-      (end[0] - begin[0]) * (end[1] - begin[1]) * (end[2] - begin[2]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                       Functor, 3>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateLeft, Functor const& functor,
-    NextSiliconMDRangeBegin<4> const& begin,
-    NextSiliconMDRangeEnd<4> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                    (end[2] - begin[2]) * (end[3] - begin[3]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                       Functor, 4>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateRight, Functor const& functor,
-    NextSiliconMDRangeBegin<4> const& begin,
-    NextSiliconMDRangeEnd<4> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                    (end[2] - begin[2]) * (end[3] - begin[3]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                       Functor, 4>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateLeft, Functor const& functor,
-    NextSiliconMDRangeBegin<5> const& begin,
-    NextSiliconMDRangeEnd<5> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                    (end[2] - begin[2]) * (end[3] - begin[3]) *
-                    (end[4] - begin[4]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                       Functor, 5>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateRight, Functor const& functor,
-    NextSiliconMDRangeBegin<5> const& begin,
-    NextSiliconMDRangeEnd<5> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                    (end[2] - begin[2]) * (end[3] - begin[3]) *
-                    (end[4] - begin[4]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                       Functor, 5>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateLeft, Functor const& functor,
-    NextSiliconMDRangeBegin<6> const& begin,
-    NextSiliconMDRangeEnd<6> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                    (end[2] - begin[2]) * (end[3] - begin[3]) *
-                    (end[4] - begin[4]) * (end[5] - begin[5]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateLeft,
-                                                       Functor, 6>(functor,
-                                                                   begin, end));
-}
-
-template <class Functor>
-void NextSiliconParallelForMDRangePolicy(
-    NextSiliconIterateRight, Functor const& functor,
-    NextSiliconMDRangeBegin<6> const& begin,
-    NextSiliconMDRangeEnd<6> const& end) {
-  const auto flat = (end[0] - begin[0]) * (end[1] - begin[1]) *
-                    (end[2] - begin[2]) * (end[3] - begin[3]) *
-                    (end[4] - begin[4]) * (end[5] - begin[5]);
-  Kokkos::parallel_for(
-      flat, NextSiliconParallelForMDRangePolicyFunctor<NextSiliconIterateRight,
-                                                       Functor, 6>(functor,
-                                                                   begin, end));
+      flat, NextSiliconParallelForMDRangePolicyFunctor<Direction, Functor, Dim>(
+                functor, begin, end));
 }
 
 }  // namespace Kokkos::Experimental::Impl
@@ -618,9 +499,10 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::MDRangePolicy<Traits...>,
     }
 
     // FIXME_NEXTSILICON: throw away requested tiling
-    Kokkos::Experimental::Impl::NextSiliconParallelForMDRangePolicy(
-        std::integral_constant<Iterate, Policy::inner_direction>(), m_functor,
-        m_policy.m_lower, m_policy.m_upper);
+    using Direction = std::integral_constant<Iterate, Policy::inner_direction>;
+    Kokkos::Experimental::Impl::NextSiliconParallelForMDRangePolicy<Direction,
+                                                                    rank>(
+        m_functor, m_policy.m_lower, m_policy.m_upper);
   }
 };
 
