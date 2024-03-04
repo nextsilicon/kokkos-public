@@ -39,27 +39,45 @@ template <int N>
 using NextSiliconMDRangeTile =
     decltype(MDRangePolicy<NextSilicon, Rank<N>>::m_tile);
 
-// a la std::div_t
+// Widen an integer type where possible (e.g. 16 -> 32 bit)
+// Don't try to widen past 64 bits.
 template <typename Integral>
-struct Div {
-  Integral quot;
-  Integral rem;
+struct wider_integral {
+  static_assert(std::is_void_v<Integral>,
+                "wider_integral not implemented for type");
+};
+template <>
+struct wider_integral<int16_t> {
+  using type = int32_t;
+};
+template <>
+struct wider_integral<int32_t> {
+  using type = int64_t;
+};
+template <>
+struct wider_integral<int64_t> {
+  using type = int64_t;
+};
+template <>
+struct wider_integral<uint16_t> {
+  using type = uint32_t;
+};
+template <>
+struct wider_integral<uint32_t> {
+  using type = uint64_t;
+};
+template <>
+struct wider_integral<uint64_t> {
+  using type = uint64_t;
 };
 
 template <typename Integral>
-KOKKOS_INLINE_FUNCTION Div<Integral> divmod(Integral x, Integral y) {
-  static_assert(std::is_integral_v<Integral>,
-                "divmod operands must be integers");
-  return {x / y, x % y};
-}
+using wider_integral_t = typename wider_integral<Integral>::type;
 
 template <typename Direction, typename Functor, int Dim>
 class NextSiliconParallelForMDRangePolicyFunctor {
  public:
-  using IndexType = typename NextSiliconMDRangeBegin::index_type;
-  static_assert(
-      std::is_same_v<IndexType, typename NextSiliconMDRangeEnd::index_type>,
-      "");
+  using IndexType = typename NextSiliconMDRangeBegin<Dim>::value_type;
 
   NextSiliconParallelForMDRangePolicyFunctor(
       Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
@@ -70,7 +88,8 @@ class NextSiliconParallelForMDRangePolicyFunctor {
     }
   }
 
-  void operator()(const IndexType i) const {
+  template <typename FlatIndexType>
+  void operator()(const FlatIndexType i) const {
     IndexType x[Dim];
     map(i, x);
     call_functor(std::make_index_sequence<Dim>() /* 0, 1, ..., Dim */, x);
@@ -84,7 +103,8 @@ class NextSiliconParallelForMDRangePolicyFunctor {
     functor_(x[I]...);
   }
 
-  void map(IndexType i, IndexType (&x)[Dim]) const {
+  template <typename FlatIndexType>
+  void map(FlatIndexType i, IndexType (&x)[Dim]) const {
     if constexpr (std::is_same_v<Direction, NextSiliconIterateLeft>) {
       // like
       // for (auto i2 = begin2; i2 < end2; ++i2) {
@@ -130,7 +150,13 @@ template <typename Direction, int Dim, class Functor>
 void NextSiliconParallelForMDRangePolicy(
     Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
     NextSiliconMDRangeEnd<Dim> const& end) {
-  auto flat = end[0] - begin[0];
+  // The extent along each dimension is an IndexType. Since these dimensions
+  // will be flattened, try to use a wider integer type to represent the
+  // flattened index space.
+  using FlatIndexType =
+      wider_integral_t<typename NextSiliconMDRangeBegin<Dim>::value_type>;
+
+  FlatIndexType flat = end[0] - begin[0];
   for (int i = 1; i < Dim; ++i) {
     flat *= end[i] - begin[i];
   }
