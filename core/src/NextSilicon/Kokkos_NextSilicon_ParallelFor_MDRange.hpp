@@ -56,35 +56,36 @@ KOKKOS_INLINE_FUNCTION Div<Integral> divmod(Integral x, Integral y) {
 template <typename Direction, typename Functor, int Dim>
 class NextSiliconParallelForMDRangePolicyFunctor {
  public:
+  using IndexType = typename NextSiliconMDRangeBegin::index_type;
+  static_assert(
+      std::is_same_v<IndexType, typename NextSiliconMDRangeEnd::index_type>,
+      "");
+
   NextSiliconParallelForMDRangePolicyFunctor(
       Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
       NextSiliconMDRangeEnd<Dim> const& end)
-      : functor_(functor),
-        begin_(begin) {
-          for (int i = 0; i < Dim; ++i) {
-            ext_[i] = end[i] - begin[i];
-          }
-        }
+      : functor_(functor), begin_(begin) {
+    for (int i = 0; i < Dim; ++i) {
+      ext_[i] = end[i] - begin[i];
+    }
+  }
 
-
-  void operator()(const int i) const {
-    int x[Dim];
+  void operator()(const IndexType i) const {
+    IndexType x[Dim];
     map(i, x);
     call_functor(std::make_index_sequence<Dim>() /* 0, 1, ..., Dim */, x);
   }
 
  private:
-
   // call the functor on a Dim-dimensional index
   template <size_t... I>
-  void call_functor(std::index_sequence<I...>, const int (&x)[Dim]) const {
+  void call_functor(std::index_sequence<I...>,
+                    const IndexType (&x)[Dim]) const {
     functor_(x[I]...);
   }
 
-  void map(int i, int (&x)[Dim]) const {
-
+  void map(IndexType i, IndexType (&x)[Dim]) const {
     if constexpr (std::is_same_v<Direction, NextSiliconIterateLeft>) {
-
       // like
       // for (auto i2 = begin2; i2 < end2; ++i2) {
       //   for (auto i1 = begin1; i1 < end1; ++i1) {
@@ -95,11 +96,10 @@ class NextSiliconParallelForMDRangePolicyFunctor {
       // }
       for (int j = 0; j < Dim; ++j) {
         auto r = std::div(i, ext_[j]);
-        x[j] = begin_[j] + r.rem;
-        i = r.quot;
+        x[j]   = begin_[j] + r.rem;
+        i      = r.quot;
       }
     } else if constexpr (std::is_same_v<Direction, NextSiliconIterateRight>) {
-
       // like
       // for (auto i0 = begin0; i0 < end0; ++i0) {
       //   for (auto i1 = begin1; i1 < end1; ++i1) {
@@ -110,17 +110,19 @@ class NextSiliconParallelForMDRangePolicyFunctor {
       // }
       for (int j = Dim - 1; j >= 0; --j) {
         auto r = std::div(i, ext_[j]);
-        x[j] = begin_[j] + r.rem;
-        i = r.quot;
+        x[j]   = begin_[j] + r.rem;
+        i      = r.quot;
       }
     } else {
-      static_assert(std::is_void_v<Functor>, "Expected NextSiliconIterateLeft or NextSiliconIterateRight");
+      static_assert(
+          std::is_void_v<Functor>,
+          "Expected NextSiliconIterateLeft or NextSiliconIterateRight");
     }
   }
 
   Functor functor_;
   NextSiliconMDRangeBegin<Dim> begin_;
-  int ext_[Dim]; // end - begin
+  int ext_[Dim];  // end - begin
   int x_[Dim];
 };
 
