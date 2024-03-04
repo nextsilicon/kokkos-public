@@ -17,6 +17,7 @@
 #ifndef KOKKOS_NEXTSILICON_PARALLELFOR_RANGE_HPP
 #define KOKKOS_NEXTSILICON_PARALLELFOR_RANGE_HPP
 
+#ifndef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 #include <nsapi/intrinsics.h>
 #if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
 #include <nsapi/parallelism.h>
