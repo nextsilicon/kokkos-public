@@ -26,34 +26,14 @@
 namespace Kokkos {
 namespace Experimental {
 
-void *NextSiliconSpace::allocate(const NextSilicon &exec_space,
-                                 const size_t arg_alloc_size) const {
-  return allocate(exec_space, "[unlabeled]", arg_alloc_size);
-}
-
 void *NextSiliconSpace::allocate(const size_t arg_alloc_size) const {
   return allocate("[unlabeled]", arg_alloc_size);
-}
-
-void *NextSiliconSpace::allocate(const NextSilicon &exec_space,
-                                 const char *arg_label,
-                                 const size_t arg_alloc_size,
-                                 const size_t arg_logical_size) const {
-  return impl_allocate(exec_space, arg_label, arg_alloc_size, arg_logical_size);
 }
 
 void *NextSiliconSpace::allocate(const char *arg_label,
                                  const size_t arg_alloc_size,
                                  const size_t arg_logical_size) const {
   return impl_allocate(arg_label, arg_alloc_size, arg_logical_size);
-}
-
-void *NextSiliconSpace::impl_allocate(
-    const NextSilicon &exec_space, const char *arg_label,
-    const size_t arg_alloc_size, const size_t arg_logical_size,
-    const Kokkos::Tools::SpaceHandle arg_handle) const {
-  (void)exec_space;
-  return impl_allocate(arg_label, arg_alloc_size, arg_logical_size, arg_handle);
 }
 
 void *NextSiliconSpace::impl_allocate(
@@ -116,34 +96,14 @@ void NextSiliconSpace::impl_deallocate(
   }
 }
 
-void *NextSiliconManagedSpace::allocate(const NextSilicon &exec_space,
-                                        const size_t arg_alloc_size) const {
-  return allocate(exec_space, "[unlabeled]", arg_alloc_size);
-}
-
 void *NextSiliconManagedSpace::allocate(const size_t arg_alloc_size) const {
   return allocate("[unlabeled]", arg_alloc_size);
-}
-
-void *NextSiliconManagedSpace::allocate(const NextSilicon &exec_space,
-                                        const char *arg_label,
-                                        const size_t arg_alloc_size,
-                                        const size_t arg_logical_size) const {
-  return impl_allocate(exec_space, arg_label, arg_alloc_size, arg_logical_size);
 }
 
 void *NextSiliconManagedSpace::allocate(const char *arg_label,
                                         const size_t arg_alloc_size,
                                         const size_t arg_logical_size) const {
   return impl_allocate(arg_label, arg_alloc_size, arg_logical_size);
-}
-
-void *NextSiliconManagedSpace::impl_allocate(
-    const NextSilicon &exec_space, const char *arg_label,
-    const size_t arg_alloc_size, const size_t arg_logical_size,
-    const Kokkos::Tools::SpaceHandle arg_handle) const {
-  (void)exec_space;
-  return impl_allocate(arg_label, arg_alloc_size, arg_logical_size, arg_handle);
 }
 
 void *NextSiliconManagedSpace::impl_allocate(

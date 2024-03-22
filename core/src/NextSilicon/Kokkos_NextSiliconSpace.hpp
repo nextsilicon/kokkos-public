@@ -50,11 +50,18 @@ class NextSiliconSpace {
   NextSiliconSpace() = default;
 
   /**\brief  Allocate untracked memory in the space */
-  void* allocate(const Kokkos::Experimental::NextSilicon& exec_space,
-                 const size_t arg_alloc_size) const;
-  void* allocate(const Kokkos::Experimental::NextSilicon& exec_space,
-                 const char* arg_label, const size_t arg_alloc_size,
-                 const size_t arg_logical_size = 0) const;
+  template <typename ExecutionSpace>
+  void* allocate(const ExecutionSpace& exec_space,
+                 const size_t arg_alloc_size) const {
+    return allocate(exec_space, "[unlabeled]", arg_alloc_size);
+  }
+  template <typename ExecutionSpace>
+  void* allocate(const ExecutionSpace& exec_space, const char* arg_label,
+                 const size_t arg_alloc_size,
+                 const size_t arg_logical_size = 0) const {
+    return impl_allocate(exec_space, arg_label, arg_alloc_size,
+                         arg_logical_size);
+  }
   void* allocate(const size_t arg_alloc_size) const;
   void* allocate(const char* arg_label, const size_t arg_alloc_size,
                  const size_t arg_logical_size = 0) const;
@@ -68,11 +75,16 @@ class NextSiliconSpace {
   static constexpr char const* name() { return "NextSiliconSpace"; }
 
  private:
-  void* impl_allocate(const Kokkos::Experimental::NextSilicon& exec_space,
-                      const char* arg_label, const size_t arg_alloc_size,
+  template <typename ExecutionSpace>
+  void* impl_allocate(const ExecutionSpace& exec_space, const char* arg_label,
+                      const size_t arg_alloc_size,
                       const size_t arg_logical_size = 0,
-                      const Kokkos::Tools::SpaceHandle =
-                          Kokkos::Tools::make_space_handle(name())) const;
+                      const Kokkos::Tools::SpaceHandle arg_handle =
+                          Kokkos::Tools::make_space_handle(name())) const {
+    (void)exec_space;
+    return impl_allocate(arg_label, arg_alloc_size, arg_logical_size,
+                         arg_handle);
+  }
   void* impl_allocate(const char* arg_label, const size_t arg_alloc_size,
                       const size_t arg_logical_size = 0,
                       const Kokkos::Tools::SpaceHandle =
@@ -103,11 +115,18 @@ class NextSiliconManagedSpace {
   NextSiliconManagedSpace() = default;
 
   /**\brief  Allocate untracked memory in the space */
-  void* allocate(const Kokkos::Experimental::NextSilicon& exec_space,
-                 const size_t arg_alloc_size) const;
-  void* allocate(const Kokkos::Experimental::NextSilicon& exec_space,
-                 const char* arg_label, const size_t arg_alloc_size,
-                 const size_t arg_logical_size = 0) const;
+  template <typename ExecutionSpace>
+  void* allocate(const ExecutionSpace& exec_space,
+                 const size_t arg_alloc_size) const {
+    return allocate(exec_space, "[unlabeled]", arg_alloc_size);
+  }
+  template <typename ExecutionSpace>
+  void* allocate(const ExecutionSpace& exec_space, const char* arg_label,
+                 const size_t arg_alloc_size,
+                 const size_t arg_logical_size = 0) const {
+    return impl_allocate(exec_space, arg_label, arg_alloc_size,
+                         arg_logical_size);
+  }
   void* allocate(const size_t arg_alloc_size) const;
   void* allocate(const char* arg_label, const size_t arg_alloc_size,
                  const size_t arg_logical_size = 0) const;
@@ -121,11 +140,16 @@ class NextSiliconManagedSpace {
   static constexpr char const* name() { return "NextSiliconManagedSpace"; }
 
  private:
-  void* impl_allocate(const Kokkos::Experimental::NextSilicon& exec_space,
-                      const char* arg_label, const size_t arg_alloc_size,
+  template <typename ExecutionSpace>
+  void* impl_allocate(const ExecutionSpace& exec_space, const char* arg_label,
+                      const size_t arg_alloc_size,
                       const size_t arg_logical_size = 0,
-                      const Kokkos::Tools::SpaceHandle =
-                          Kokkos::Tools::make_space_handle(name())) const;
+                      const Kokkos::Tools::SpaceHandle arg_handle =
+                          Kokkos::Tools::make_space_handle(name())) const {
+    (void)exec_space;
+    return impl_allocate(arg_label, arg_alloc_size, arg_logical_size,
+                         arg_handle);
+  }
   void* impl_allocate(const char* arg_label, const size_t arg_alloc_size,
                       const size_t arg_logical_size = 0,
                       const Kokkos::Tools::SpaceHandle =
