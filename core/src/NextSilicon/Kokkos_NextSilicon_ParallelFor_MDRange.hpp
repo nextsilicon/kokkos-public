@@ -39,45 +39,10 @@ template <int N>
 using NextSiliconMDRangeTile =
     decltype(MDRangePolicy<NextSilicon, Rank<N>>::m_tile);
 
-// Widen an integer type where possible (e.g. 16 -> 32 bit)
-// Don't try to widen past 64 bits.
-template <typename Integral>
-struct wider_integral {
-  static_assert(std::is_void_v<Integral>,
-                "wider_integral not implemented for type");
-};
-template <>
-struct wider_integral<int16_t> {
-  using type = int32_t;
-};
-template <>
-struct wider_integral<int32_t> {
-  using type = int64_t;
-};
-template <>
-struct wider_integral<int64_t> {
-  using type = int64_t;
-};
-template <>
-struct wider_integral<uint16_t> {
-  using type = uint32_t;
-};
-template <>
-struct wider_integral<uint32_t> {
-  using type = uint64_t;
-};
-template <>
-struct wider_integral<uint64_t> {
-  using type = uint64_t;
-};
-
-template <typename Integral>
-using wider_integral_t = typename wider_integral<Integral>::type;
-
 template <typename Direction, typename Functor, int Dim>
 class NextSiliconParallelForMDRangePolicyFunctor {
  public:
-  using IndexType = typename NextSiliconMDRangeBegin<Dim>::value_type;
+  using IndexType = typename NextSiliconMDRangeEnd<Dim>::value_type;
 
   NextSiliconParallelForMDRangePolicyFunctor(
       Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
@@ -142,23 +107,24 @@ class NextSiliconParallelForMDRangePolicyFunctor {
 
   Functor functor_;
   NextSiliconMDRangeBegin<Dim> begin_;
-  int ext_[Dim];  // end - begin
-  int x_[Dim];
+  NextSiliconMDRangeEnd<Dim> ext_;  // end - begin
 };
 
 template <typename Direction, int Dim, class Functor>
 void NextSiliconParallelForMDRangePolicy(
     Functor const& functor, NextSiliconMDRangeBegin<Dim> const& begin,
     NextSiliconMDRangeEnd<Dim> const& end) {
-  // The extent along each dimension is an IndexType. Since these dimensions
-  // will be flattened, try to use a wider integer type to represent the
-  // flattened index space.
-  using FlatIndexType =
-      wider_integral_t<typename NextSiliconMDRangeBegin<Dim>::value_type>;
+  using FlatIndexType = uint64_t;
 
   FlatIndexType flat = end[0] - begin[0];
   for (int i = 1; i < Dim; ++i) {
-    flat *= end[i] - begin[i];
+    const FlatIndexType factor  = end[i] - begin[i];
+    const FlatIndexType newFlat = flat * factor;
+    if (factor != 0 && newFlat / factor != flat) {
+      Kokkos::abort(
+          "Overflow when flattening MDRange policy into Range policy");
+    }
+    flat = newFlat;
   }
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<Direction, Functor, Dim>(
