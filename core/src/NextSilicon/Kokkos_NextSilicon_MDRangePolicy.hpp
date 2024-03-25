@@ -17,6 +17,7 @@
 #ifndef KOKKOS_NEXTSILICON_MDRANGE_POLICY_HPP
 #define KOKKOS_NEXTSILICON_MDRANGE_POLICY_HPP
 
+#include <Kokkos_NextSilicon.hpp>
 #include <KokkosExp_MDRangePolicy.hpp>
 
 template <>
