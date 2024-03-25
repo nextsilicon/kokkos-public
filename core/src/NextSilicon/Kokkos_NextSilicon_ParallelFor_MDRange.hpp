@@ -27,8 +27,6 @@
 
 namespace Kokkos::Experimental::Impl {
 
-using NextSiliconIterateLeft  = std::integral_constant<Iterate, Iterate::Left>;
-using NextSiliconIterateRight = std::integral_constant<Iterate, Iterate::Right>;
 template <int N>
 using NextSiliconMDRangeBegin =
     decltype(MDRangePolicy<NextSilicon, Rank<N>>::m_lower);
@@ -70,7 +68,8 @@ class NextSiliconParallelForMDRangePolicyFunctor {
 
   template <typename FlatIndexType>
   void map(FlatIndexType i, IndexType (&x)[Dim]) const {
-    if constexpr (std::is_same_v<Direction, NextSiliconIterateLeft>) {
+    if constexpr (std::is_same_v<Direction, std::integral_constant<
+                                                Iterate, Iterate::Left>>) {
       // like
       // for (auto i2 = begin2; i2 < end2; ++i2) {
       //   for (auto i1 = begin1; i1 < end1; ++i1) {
@@ -84,7 +83,9 @@ class NextSiliconParallelForMDRangePolicyFunctor {
         x[j]   = begin_[j] + r.rem;
         i      = r.quot;
       }
-    } else if constexpr (std::is_same_v<Direction, NextSiliconIterateRight>) {
+    } else if constexpr (std::is_same_v<
+                             Direction,
+                             std::integral_constant<Iterate, Iterate::Right>>) {
       // like
       // for (auto i0 = begin0; i0 < end0; ++i0) {
       //   for (auto i1 = begin1; i1 < end1; ++i1) {
@@ -99,9 +100,8 @@ class NextSiliconParallelForMDRangePolicyFunctor {
         i      = r.quot;
       }
     } else {
-      static_assert(
-          std::is_void_v<Functor>,
-          "Expected NextSiliconIterateLeft or NextSiliconIterateRight");
+      static_assert(std::is_void_v<Functor>,
+                    "Expected left or right MDRange iteration");
     }
   }
 
