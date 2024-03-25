@@ -21,6 +21,7 @@
 #include <NextSilicon/Kokkos_NextSilicon_FunctorAdapter.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_MDRangePolicy.hpp>
 #include <Kokkos_Parallel.hpp>
+#include <Kokkos_CheckedIntegerOps.hpp>
 
 #include <type_traits>
 #include <utility>
@@ -118,13 +119,9 @@ void NextSiliconParallelForMDRangePolicy(
 
   FlatIndexType flat = end[0] - begin[0];
   for (int i = 1; i < Dim; ++i) {
-    const FlatIndexType factor  = end[i] - begin[i];
-    const FlatIndexType newFlat = flat * factor;
-    if (factor != 0 && newFlat / factor != flat) {
-      Kokkos::abort(
-          "Overflow when flattening MDRange policy into Range policy");
-    }
-    flat = newFlat;
+    const FlatIndexType factor = end[i] - begin[i];
+    const FlatIndexType flat =
+        Kokkos::Impl::multiply_overflow_abort(flat, factor);
   }
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<Direction, Functor, Dim>(
