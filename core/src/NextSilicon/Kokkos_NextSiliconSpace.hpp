@@ -81,7 +81,9 @@ class NextSiliconSpace {
                       const size_t arg_logical_size = 0,
                       const Kokkos::Tools::SpaceHandle arg_handle =
                           Kokkos::Tools::make_space_handle(name())) const {
-    (void)exec_space;
+    if (!std::is_same_v<ExecutionSpace, Kokkos::Experimental::NextSilicon>) {
+      exec_space.fence();
+    }
     return impl_allocate(arg_label, arg_alloc_size, arg_logical_size,
                          arg_handle);
   }
@@ -146,7 +148,9 @@ class NextSiliconManagedSpace {
                       const size_t arg_logical_size = 0,
                       const Kokkos::Tools::SpaceHandle arg_handle =
                           Kokkos::Tools::make_space_handle(name())) const {
-    (void)exec_space;
+    if (!std::is_same_v<ExecutionSpace, Kokkos::Experimental::NextSilicon>) {
+      exec_space.fence();
+    }
     return impl_allocate(arg_label, arg_alloc_size, arg_logical_size,
                          arg_handle);
   }
