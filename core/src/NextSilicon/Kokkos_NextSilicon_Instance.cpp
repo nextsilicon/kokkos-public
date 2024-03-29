@@ -22,7 +22,8 @@
 
 #include <ostream>
 
-#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
+#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL) && \
+    defined(KOKKOS_ENABLE_IMPL_NSAPI_ADD_TELEM_REGIONS)
 #include <nsapi/telem.h>
 #endif
 
@@ -33,7 +34,8 @@ Kokkos::Experimental::Impl::NextSiliconInternal::singleton() {
 }
 
 void Kokkos::Experimental::Impl::NextSiliconInternal::initialize() {
-#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
+#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL) && \
+    defined(KOKKOS_ENABLE_IMPL_NSAPI_ADD_TELEM_REGIONS)
   /* Wrap the entire program with a nsapi telem region.
    * Required for performance estimation to take into account all kernel
    * invocations.
@@ -44,7 +46,8 @@ void Kokkos::Experimental::Impl::NextSiliconInternal::initialize() {
 }
 
 void Kokkos::Experimental::Impl::NextSiliconInternal::finalize() {
-#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
+#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL) && \
+    defined(KOKKOS_ENABLE_IMPL_NSAPI_ADD_TELEM_REGIONS)
   nsapi_telem_region_exit();
 #endif
 
