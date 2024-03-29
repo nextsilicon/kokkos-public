@@ -120,8 +120,7 @@ void NextSiliconParallelForMDRangePolicy(
   FlatIndexType flat = end[0] - begin[0];
   for (int i = 1; i < Dim; ++i) {
     const FlatIndexType factor = end[i] - begin[i];
-    const FlatIndexType flat =
-        Kokkos::Impl::multiply_overflow_abort(flat, factor);
+    flat = Kokkos::Impl::multiply_overflow_abort(flat, factor);
   }
   Kokkos::parallel_for(
       flat, NextSiliconParallelForMDRangePolicyFunctor<Direction, Functor, Dim>(
