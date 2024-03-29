@@ -20,6 +20,7 @@
 #include <nsapi/intrinsics.h>
 #if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
 #include <nsapi/parallelism.h>
+#endif
 
 #include <NextSilicon/Kokkos_NextSilicon.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_FunctorAdapter.hpp>
