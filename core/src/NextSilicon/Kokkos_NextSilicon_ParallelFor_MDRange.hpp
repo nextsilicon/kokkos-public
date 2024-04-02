@@ -21,7 +21,7 @@
 #include <NextSilicon/Kokkos_NextSilicon_FunctorAdapter.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_MDRangePolicy.hpp>
 #include <Kokkos_Parallel.hpp>
-#include <Kokkos_CheckedIntegerOps.hpp>
+#include <impl/Kokkos_CheckedIntegerOps.hpp>
 
 #include <type_traits>
 #include <utility>
