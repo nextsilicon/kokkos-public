@@ -53,7 +53,7 @@ class NextSiliconParallelForMDRangePolicyFunctor {
   }
 
   template <typename FlatIndexType>
-  void operator()(const FlatIndexType i) const {
+  KOKKOS_INLINE_FUNCTION void operator()(const FlatIndexType i) const {
     IndexType x[Dim];
     map(i, x);
     call_functor(std::make_index_sequence<Dim>() /* 0, 1, ..., Dim */, x);
@@ -62,13 +62,13 @@ class NextSiliconParallelForMDRangePolicyFunctor {
  private:
   // call the functor on a Dim-dimensional index
   template <size_t... I>
-  void call_functor(std::index_sequence<I...>,
-                    const IndexType (&x)[Dim]) const {
+  KOKKOS_INLINE_FUNCTION void call_functor(std::index_sequence<I...>,
+                                           const IndexType (&x)[Dim]) const {
     functor_(x[I]...);
   }
 
   template <typename FlatIndexType>
-  void map(FlatIndexType i, IndexType (&x)[Dim]) const {
+  KOKKOS_INLINE_FUNCTION void map(FlatIndexType i, IndexType (&x)[Dim]) const {
     if constexpr (std::is_same_v<Direction, std::integral_constant<
                                                 Iterate, Iterate::Left>>) {
       // like
