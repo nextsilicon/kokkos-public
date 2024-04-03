@@ -79,8 +79,12 @@ class NextSiliconParallelForMDRangePolicyFunctor {
       //     }
       //   }
       // }
+
+#pragma unroll
       for (int j = 0; j < Dim; ++j) {
-        auto r = std::div(i, ext_[j]);
+        std::lldiv_t r;
+        r.quot = i / ext_[j];
+        r.rem  = i % ext_[j];
         x[j]   = begin_[j] + r.rem;
         i      = r.quot;
       }
@@ -95,8 +99,12 @@ class NextSiliconParallelForMDRangePolicyFunctor {
       //     }
       //   }
       // }
+
+#pragma unroll
       for (int j = Dim - 1; j >= 0; --j) {
-        auto r = std::div(i, ext_[j]);
+        std::lldiv_t r;
+        r.quot = i / ext_[j];
+        r.rem  = i % ext_[j];
         x[j]   = begin_[j] + r.rem;
         i      = r.quot;
       }
