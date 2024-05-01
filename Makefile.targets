@@ -28,7 +28,7 @@ Kokkos_SharedAlloc.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/impl/Kokkos_
 	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/impl/Kokkos_SharedAlloc.cpp
 Kokkos_MemoryPool.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/impl/Kokkos_MemoryPool.cpp
 	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/impl/Kokkos_MemoryPool.cpp
-Kokkos_HostSpace_deepcopy.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/impl/Kokkos_HostSpace_deepcopy.cpp 
+Kokkos_HostSpace_deepcopy.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/impl/Kokkos_HostSpace_deepcopy.cpp
 	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/impl/Kokkos_HostSpace_deepcopy.cpp
 Kokkos_NumericTraits.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/impl/Kokkos_NumericTraits.cpp
 	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/impl/Kokkos_NumericTraits.cpp
@@ -120,4 +120,19 @@ Kokkos_OpenACC_Instance.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/OpenACC
 	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/OpenACC/Kokkos_OpenACC_Instance.cpp
 Kokkos_OpenACC_SharedAllocationRecord.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/OpenACC/Kokkos_OpenACC_SharedAllocationRecord.cpp
 	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/OpenACC/Kokkos_OpenACC_SharedAllocationRecord.cpp
+endif
+
+ifeq ($(KOKKOS_INTERNAL_USE_NEXTSILICON), 1)
+Kokkos_NextSilicon.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon.cpp
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon.cpp
+Kokkos_NextSilicon_Instance.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_Instance.cpp
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_Instance.cpp
+Kokkos_NextSiliconSpace.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSiliconSpace.cpp
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSiliconSpace.cpp
+Kokkos_NextSilicon_DeepCopy.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_DeepCopy.cpp
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_DeepCopy.cpp
+Kokkos_NextSilicon_ZeroMemset.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_ZeroMemset.cpp
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_ZeroMemset.cpp
+Kokkos_NextSilicon_SharedAllocationRecord.o: $(KOKKOS_CPP_DEPENDS) $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_SharedAllocationRecord.cpp
+	$(CXX) $(KOKKOS_CPPFLAGS) $(KOKKOS_CXXFLAGS) $(CXXFLAGS) -c $(KOKKOS_PATH)/core/src/NextSilicon/Kokkos_NextSilicon_SharedAllocationRecord.cpp
 endif
