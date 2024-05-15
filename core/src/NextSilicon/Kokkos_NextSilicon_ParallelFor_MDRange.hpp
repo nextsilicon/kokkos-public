@@ -56,7 +56,7 @@ class NextSiliconParallelForMDRangePolicyFunctor {
   KOKKOS_INLINE_FUNCTION void operator()(const FlatIndexType i) const {
     IndexType x[Dim];
     map(i, x);
-    call_functor(std::make_index_sequence<Dim>() /* 0, 1, ..., Dim */, x);
+    call_functor(std::make_index_sequence<Dim>() /* 0, 1, ..., Dim-1 */, x);
   }
 
  private:
