@@ -85,8 +85,8 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 
  private:
 #pragma ns mark import_recursive
-  __attribute__((noinline)) static void microtask(
-      FunctorWrapper const* __restrict functor, const Policy* policy) {
+  static void microtask(FunctorWrapper const* __restrict functor,
+                        const Policy* policy) {
     // TODO: On the device, the optimizer should turn those calls into
     // invariants/feeders
     // On host we're doing a serial for now, so the default values
