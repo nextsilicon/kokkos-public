@@ -24,6 +24,11 @@
 
 namespace Kokkos::Impl {
 
+// FIXME_NEXTSILICON: This is a single-threaded host CPU implementation of
+// Kokkos::parallel_scan. This only works with Next Silicon
+// transparently-migratable memory, and is intended as a temporary (but correct)
+// implementation of parallel_scan so applications that use it can be compiled
+// and run against the new backend with bad performance.
 template <class Functor, class GivenValueType, class... Traits>
 class ParallelScanNextSiliconHostPlaceholder {
  protected:
