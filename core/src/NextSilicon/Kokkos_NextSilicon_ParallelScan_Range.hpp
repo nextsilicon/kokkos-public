@@ -52,8 +52,9 @@ class ParallelScanNextSiliconHostPlaceholder {
         m_policy(arg_policy),
         m_result_ptr(arg_result_ptr) {}
 
-  void RangePolicy(const IndexType begin, const IndexType end,
-                   IndexType /*chunk_size*/) const {
+  void execute() const {
+    const IndexType begin = m_policy.begin();
+    const IndexType end   = m_policy.end();
     const Kokkos::Experimental::Impl::FunctorAdapter<Functor, Policy> functor(
         m_functor);
     typename Analysis::Reducer final_reducer(m_functor);
@@ -66,13 +67,6 @@ class ParallelScanNextSiliconHostPlaceholder {
     if (m_result_ptr) {
       *m_result_ptr = update;
     }
-  }
-
-  void execute() const {
-    const IndexType begin = m_policy.begin();
-    const IndexType end   = m_policy.end();
-    IndexType chunk_size  = m_policy.chunk_size();
-    RangePolicy(begin, end, chunk_size);
   }
 };
 
@@ -90,14 +84,6 @@ class Kokkos::Impl::ParallelScan<Functor, Kokkos::RangePolicy<Traits...>,
   using IndexType = typename base_t::IndexType;
 
  public:
-  void execute() const {
-    const IndexType begin = base_t::m_policy.begin();
-    const IndexType end   = base_t::m_policy.end();
-    IndexType chunk_size  = base_t::m_policy.chunk_size();
-
-    base_t::RangePolicy(begin, end, chunk_size);
-  }
-
   ParallelScan(const Functor& arg_functor,
                const typename base_t::Policy& arg_policy)
       : base_t(arg_functor, arg_policy, nullptr) {}
@@ -111,24 +97,8 @@ class Kokkos::Impl::ParallelScanWithTotal<
                                                     Traits...> {
   using base_t = ParallelScanNextSiliconHostPlaceholder<FunctorType, ReturnType,
                                                         Traits...>;
-  using IndexType = typename base_t::IndexType;
 
  public:
-  void execute() const {
-    const IndexType begin = base_t::m_policy.begin();
-    const IndexType end   = base_t::m_policy.end();
-    IndexType chunk_size  = base_t::m_policy.chunk_size();
-
-    if (end <= begin) {
-      if (base_t::m_result_ptr != nullptr) {
-        *base_t::m_result_ptr = 0;
-      }
-      return;
-    }
-
-    base_t::RangePolicy(begin, end, chunk_size);
-  }
-
   template <class ViewType>
   ParallelScanWithTotal(const FunctorType& arg_functor,
                         const typename base_t::Policy& arg_policy,
