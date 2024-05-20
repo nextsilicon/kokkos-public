@@ -22,7 +22,6 @@
 #include <NextSilicon/Kokkos_NextSilicon_Macros.hpp>
 #include <Kokkos_Parallel.hpp>
 
-
 namespace Kokkos::Impl {
 
 template <class Functor, class GivenValueType, class... Traits>
@@ -41,29 +40,27 @@ class ParallelScanNextSiliconHostPlaceholder {
   ValueType* m_result_ptr;
 
  public:
-  ParallelScanNextSiliconHostPlaceholder(Functor const& arg_functor, Policy const& arg_policy,
-                          ValueType* arg_result_ptr)
+  ParallelScanNextSiliconHostPlaceholder(Functor const& arg_functor,
+                                         Policy const& arg_policy,
+                                         ValueType* arg_result_ptr)
       : m_functor(arg_functor),
         m_policy(arg_policy),
         m_result_ptr(arg_result_ptr) {}
 
-  void RangePolicy(const IndexType begin,
-                                      const IndexType end, IndexType /*chunk_size*/) const {
-
-    const Kokkos::Experimental::Impl::FunctorAdapter<
-        Functor, Policy>
-        functor(m_functor);
+  void RangePolicy(const IndexType begin, const IndexType end,
+                   IndexType /*chunk_size*/) const {
+    const Kokkos::Experimental::Impl::FunctorAdapter<Functor, Policy> functor(
+        m_functor);
     typename Analysis::Reducer final_reducer(m_functor);
 
     ValueType update;
     final_reducer.init(&update);
     for (IndexType i = begin; i < end; ++i) {
-        functor(i, update, /*final*/ true);
+      functor(i, update, /*final*/ true);
     }
     if (m_result_ptr) {
-        *m_result_ptr = update;
+      *m_result_ptr = update;
     }
-
   }
 
   void execute() const {
@@ -83,7 +80,8 @@ template <class Functor, class... Traits>
 class Kokkos::Impl::ParallelScan<Functor, Kokkos::RangePolicy<Traits...>,
                                  Kokkos::Experimental::NextSilicon>
     : public ParallelScanNextSiliconHostPlaceholder<Functor, void, Traits...> {
-  using base_t    = ParallelScanNextSiliconHostPlaceholder<Functor, void, Traits...>;
+  using base_t =
+      ParallelScanNextSiliconHostPlaceholder<Functor, void, Traits...>;
   using IndexType = typename base_t::IndexType;
 
  public:
@@ -104,8 +102,10 @@ template <class FunctorType, class ReturnType, class... Traits>
 class Kokkos::Impl::ParallelScanWithTotal<
     FunctorType, Kokkos::RangePolicy<Traits...>, ReturnType,
     Kokkos::Experimental::NextSilicon>
-    : public ParallelScanNextSiliconHostPlaceholder<FunctorType, ReturnType, Traits...> {
-  using base_t    = ParallelScanNextSiliconHostPlaceholder<FunctorType, ReturnType, Traits...>;
+    : public ParallelScanNextSiliconHostPlaceholder<FunctorType, ReturnType,
+                                                    Traits...> {
+  using base_t = ParallelScanNextSiliconHostPlaceholder<FunctorType, ReturnType,
+                                                        Traits...>;
   using IndexType = typename base_t::IndexType;
 
  public:
@@ -113,7 +113,6 @@ class Kokkos::Impl::ParallelScanWithTotal<
     const IndexType begin = base_t::m_policy.begin();
     const IndexType end   = base_t::m_policy.end();
     IndexType chunk_size  = base_t::m_policy.chunk_size();
-
 
     if (end <= begin) {
       if (base_t::m_result_ptr != nullptr) {
@@ -129,11 +128,7 @@ class Kokkos::Impl::ParallelScanWithTotal<
   ParallelScanWithTotal(const FunctorType& arg_functor,
                         const typename base_t::Policy& arg_policy,
                         const ViewType& arg_result_view)
-      : base_t(arg_functor, arg_policy, arg_result_view.data()) {
-  }
+      : base_t(arg_functor, arg_policy, arg_result_view.data()) {}
 };
-
-#undef KOKKOS_IMPL_ACC_ACCESS_ELEMENTS
-#undef KOKKOS_IMPL_ACC_ELEMENT_VALUES_CLAUSE
 
 #endif
