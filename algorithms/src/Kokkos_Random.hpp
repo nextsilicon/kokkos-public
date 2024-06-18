@@ -721,6 +721,27 @@ struct Random_UniqueIndex<
 };
 #endif
 
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+template <class MemorySpace>
+struct Random_UniqueIndex<
+    Kokkos::Device<Kokkos::Experimental::NextSilicon, MemorySpace>> {
+  using locks_view_type =
+      View<int**,
+           Kokkos::Device<Kokkos::Experimental::NextSilicon, MemorySpace>>;
+  KOKKOS_FUNCTION
+  static int get_state_idx(const locks_view_type& locks) {
+    int i =
+        nsapi_team_get_thread_index();  // unique tid in a given parallel region
+    const int lock_size = locks.extent_int(0);
+
+    while (Kokkos::atomic_compare_exchange(&locks(i, 0), 0, 1)) {
+      i = (i + 1) % lock_size;
+    }
+    return i;
+  }
+};
+#endif
+
 }  // namespace Impl
 
 template <class DeviceType>
