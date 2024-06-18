@@ -199,6 +199,25 @@ struct DefaultContribution<Kokkos::SYCL,
 };
 #endif
 
+// FIXME_NEXTSILICON: this is a copy of the CUDA specialization, not chosen for
+// any particularly good reason
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+template <>
+struct DefaultDuplication<Kokkos::Experimental::NextSilicon> {
+  using type = Kokkos::Experimental::ScatterNonDuplicated;
+};
+template <>
+struct DefaultContribution<Kokkos::Experimental::NextSilicon,
+                           Kokkos::Experimental::ScatterNonDuplicated> {
+  using type = Kokkos::Experimental::ScatterAtomic;
+};
+template <>
+struct DefaultContribution<Kokkos::Experimental::NextSilicon,
+                           Kokkos::Experimental::ScatterDuplicated> {
+  using type = Kokkos::Experimental::ScatterAtomic;
+};
+#endif
+
 // FIXME All these scatter values need overhaul:
 //   - like should they be copyable at all?
 //   - what is the internal handle type
