@@ -28,6 +28,7 @@
 #include <NextSilicon/Kokkos_NextSilicon_ParallelFor_Team.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelFor_MDRange.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelReduce_Range.hpp>
+#include <NextSilicon/Kokkos_NextSilicon_ParallelReduce_Team.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_ParallelScan_Range.hpp>
 #endif
 
