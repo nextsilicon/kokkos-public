@@ -138,12 +138,16 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     reducer->init(&val);
 
     for (auto i = ibeg; i < iend; ++i) {
-      (*functor)(i, val);
+      if constexpr (std::is_void_v<WorkTag>) {
+        (*functor)(i, val);
+      } else {
+        (*functor)(WorkTag{}, i, val);
+      }
     }
 
     result_arr[thread_index] = val;
 
-    uint32_t counter_val = __atomic_add_fetch(counter, 1, __ATOMIC_SEQ_CST);
+    uint32_t counter_val = __atomic_add_fetch(counter, 1, __ATOMIC_ACQ_REL);
     if (counter_val < team_size) {
       return;
     }
@@ -157,7 +161,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     for (uint32_t i = 1; i < team_size; ++i) {
       reducer->join(&result_arr[0], &result_arr[i]);
     }
-    reducer->final(result_ptr);
+    reducer->final(&result_arr[0]);
     *result_ptr = result_arr[0];
   }
 };
