@@ -21,6 +21,11 @@
 #include <NextSilicon/Kokkos_NextSilicon_FunctorAdapter.hpp>
 #include <NextSilicon/Kokkos_NextSilicon_Macros.hpp>
 
+#include <nsapi/intrinsics.h>
+#if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
+#include <nsapi/parallelism.h>
+#endif
+
 template <class CombinedFunctorReducerType, class... Properties>
 class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
                                    Kokkos::TeamPolicy<Properties...>,
@@ -61,87 +66,142 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
 namespace Kokkos {
 
 // Hierarchical Parallelism -> Team thread level implementation
-template <typename iType, class Lambda, typename ValueType>
-KOKKOS_INLINE_FUNCTION std::enable_if_t<!Kokkos::is_reducer_v<ValueType>>
-parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
-                    iType, Impl::NextSiliconTeamMember>& loop_boundaries,
-                const Lambda& lambda, ValueType& result) {
-  ValueType tmp = ValueType();
-  iType j_start =
-      loop_boundaries.team.team_rank() / loop_boundaries.team.vector_length();
-  if (j_start == 0) {
-    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
-      lambda(i, tmp);
-    result = tmp;
-  }
-}
-
+// FIXME_NEXTSILICON: single-thread implementation
 template <typename iType, class Lambda, typename ReducerType>
-KOKKOS_INLINE_FUNCTION std::enable_if_t<Kokkos::is_reducer_v<ReducerType>>
+KOKKOS_INLINE_FUNCTION std::enable_if_t<Kokkos::is_reducer<ReducerType>::value>
 parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
                     iType, Impl::NextSiliconTeamMember>& loop_boundaries,
                 const Lambda& lambda, const ReducerType& reducer) {
-  using ValueType = typename ReducerType::value_type;
-  ValueType tmp;
-  reducer.init(tmp);
-  iType j_start =
-      loop_boundaries.team.team_rank() / loop_boundaries.team.vector_length();
-  if (j_start == 0) {
+  using value_type     = typename ReducerType::value_type;
+  using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, ReducerType,
+      value_type>::Reducer;
+
+  if (0 == loop_boundaries.team.team_rank()) {
+    WrappedReducer wrappedReducer(reducer);
+    value_type val;
+    wrappedReducer.init(&val);
+
     for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
-      lambda(i, tmp);
-    reducer.reference() = tmp;
+      lambda(i, val);
+    wrappedReducer.final(&val);
+    wrappedReducer.reference() = val;
+  }
+}
+template <typename iType, class Lambda, typename ValueType>
+KOKKOS_INLINE_FUNCTION std::enable_if_t<!Kokkos::is_reducer<ValueType>::value>
+parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
+                    iType, Impl::NextSiliconTeamMember>& loop_boundaries,
+                const Lambda& lambda, ValueType& result) {
+  using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
+      ValueType>::Reducer;
+
+  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>,
+                "");
+  if (0 == loop_boundaries.team.team_rank()) {
+    ValueType val;
+    WrappedReducer wrappedReducer(lambda);
+    wrappedReducer.init(&val);
+
+    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
+      lambda(i, val);
+    wrappedReducer.final(&val);
+    result = val;
   }
 }
 
 // Hierarchical Parallelism -> Thread vector level implementation
-template <typename iType, class Lambda, typename ValueType>
-KOKKOS_INLINE_FUNCTION std::enable_if_t<!Kokkos::is_reducer_v<ValueType>>
-parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
-                    iType, Impl::NextSiliconTeamMember>& loop_boundaries,
-                const Lambda& lambda, ValueType& result) {
-  ValueType tmp = ValueType();
-  iType j_start =
-      loop_boundaries.team.team_rank() % loop_boundaries.team.vector_length();
-  if (j_start == 0) {
-    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++) {
-      lambda(i, tmp);
-    }
-    result = tmp;
-  }
-}
-
+// FIXME_NEXTSILICON: single-vector implementation
 template <typename iType, class Lambda, typename ReducerType>
-KOKKOS_INLINE_FUNCTION std::enable_if_t<Kokkos::is_reducer_v<ReducerType>>
+KOKKOS_INLINE_FUNCTION std::enable_if_t<Kokkos::is_reducer<ReducerType>::value>
 parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
                     iType, Impl::NextSiliconTeamMember>& loop_boundaries,
                 const Lambda& lambda, const ReducerType& reducer) {
-  using ValueType = typename ReducerType::value_type;
-  ValueType tmp;
-  reducer.init(tmp);
-  iType j_start =
-      loop_boundaries.team.team_rank() % loop_boundaries.team.vector_length();
-  if (j_start == 0) {
-    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++) {
-      lambda(i, tmp);
-    }
-    reducer.reference() = tmp;
+  using value_type     = typename ReducerType::value_type;
+  using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, ReducerType,
+      value_type>::Reducer;
+
+  if (0 ==
+      nsapi_team_get_thread_index() % loop_boundaries.team.vector_length()) {
+    WrappedReducer wrappedReducer(reducer);
+    value_type val;
+    wrappedReducer.init(&val);
+
+    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
+      lambda(i, val);
+    wrappedReducer.final(&val);
+    wrappedReducer.reference() = val;
+  }
+}
+template <typename iType, class Lambda, typename ValueType>
+KOKKOS_INLINE_FUNCTION std::enable_if_t<!Kokkos::is_reducer<ValueType>::value>
+parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
+                    iType, Impl::NextSiliconTeamMember>& loop_boundaries,
+                const Lambda& lambda, ValueType& result) {
+  using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
+      ValueType>::Reducer;
+
+  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>,
+                "");
+  if (0 ==
+      nsapi_team_get_thread_index() % loop_boundaries.team.vector_length()) {
+    ValueType val;
+    WrappedReducer wrappedReducer(lambda);
+    wrappedReducer.init(&val);
+
+    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
+      lambda(i, val);
+    wrappedReducer.final(&val);
+    result = val;
   }
 }
 
 // Hierarchical Parallelism -> Team vector level implementation
+// FIXME_NEXTSILICON: single-vector implementation
+template <typename iType, class Lambda, typename ReducerType>
+KOKKOS_INLINE_FUNCTION std::enable_if_t<Kokkos::is_reducer<ReducerType>::value>
+parallel_reduce(const Impl::TeamVectorRangeBoundariesStruct<
+                    iType, Impl::NextSiliconTeamMember>& loop_boundaries,
+                const Lambda& lambda, const ReducerType& reducer) {
+  using value_type     = typename ReducerType::value_type;
+  using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, ReducerType,
+      value_type>::Reducer;
+
+  if (0 == nsapi_team_get_thread_index()) {
+    WrappedReducer wrappedReducer(reducer);
+    value_type val;
+    wrappedReducer.init(&val);
+
+    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
+      lambda(i, val);
+    wrappedReducer.final(&val);
+    wrappedReducer.reference() = val;
+  }
+}
 template <typename iType, class Lambda, typename ValueType>
-KOKKOS_INLINE_FUNCTION void parallel_reduce(
-    const Impl::TeamVectorRangeBoundariesStruct<
-        iType, Impl::NextSiliconTeamMember>& loop_boundaries,
-    const Lambda& lambda, ValueType& result) {
-  ValueType tmp = ValueType();
-  iType j_start =
-      loop_boundaries.team.team_rank() % loop_boundaries.team.vector_length();
-  if (j_start == 0) {
-    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++) {
-      lambda(i, tmp);
-    }
-    result = tmp;
+KOKKOS_INLINE_FUNCTION std::enable_if_t<!Kokkos::is_reducer<ValueType>::value>
+parallel_reduce(const Impl::TeamVectorRangeBoundariesStruct<
+                    iType, Impl::NextSiliconTeamMember>& loop_boundaries,
+                const Lambda& lambda, ValueType& result) {
+  using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
+      ValueType>::Reducer;
+
+  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>,
+                "");
+  if (0 == nsapi_team_get_thread_index()) {
+    ValueType val;
+    WrappedReducer wrappedReducer(lambda);
+    wrappedReducer.init(&val);
+
+    for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
+      lambda(i, val);
+    wrappedReducer.final(&val);
+    result = val;
   }
 }
 
