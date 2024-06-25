@@ -97,8 +97,7 @@ parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
       Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
       ValueType>::Reducer;
 
-  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>,
-                "");
+  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>);
   if (0 == loop_boundaries.team.team_rank()) {
     ValueType val;
     WrappedReducer wrappedReducer(lambda);
@@ -144,8 +143,7 @@ parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
       Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
       ValueType>::Reducer;
 
-  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>,
-                "");
+  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>);
   if (0 ==
       nsapi_team_get_thread_index() % loop_boundaries.team.vector_length()) {
     ValueType val;
@@ -191,8 +189,7 @@ parallel_reduce(const Impl::TeamVectorRangeBoundariesStruct<
       Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
       ValueType>::Reducer;
 
-  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>,
-                "");
+  static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>);
   if (0 == nsapi_team_get_thread_index()) {
     ValueType val;
     WrappedReducer wrappedReducer(lambda);
