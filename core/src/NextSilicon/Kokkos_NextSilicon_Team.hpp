@@ -270,8 +270,7 @@ class TeamPolicyInternal<Kokkos::Experimental::NextSilicon, Properties...>
       : m_team_scratch_size{0, 0},
         m_thread_scratch_size{0, 0},
         m_chunk_size(0) {
-    init(league_size_request, default_team_size / vector_length_request,
-         vector_length_request);
+    init(league_size_request, default_team_size, vector_length_request);
   }
 
   TeamPolicyInternal(const typename traits::execution_space&,
@@ -308,8 +307,7 @@ class TeamPolicyInternal<Kokkos::Experimental::NextSilicon, Properties...>
       : m_team_scratch_size{0, 0},
         m_thread_scratch_size{0, 0},
         m_chunk_size(0) {
-    init(league_size_request, default_team_size / vector_length_request,
-         vector_length_request);
+    init(league_size_request, default_team_size, vector_length_request);
   }
 
   TeamPolicyInternal(int league_size_request,
