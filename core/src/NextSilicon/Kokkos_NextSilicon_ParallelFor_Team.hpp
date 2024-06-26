@@ -92,13 +92,12 @@ KOKKOS_INLINE_FUNCTION void parallel_for(
     const Impl::TeamThreadRangeBoundariesStruct<
         iType, Impl::NextSiliconTeamMember>& loop_boundaries,
     const Lambda& lambda) {
-  iType j_start = loop_boundaries.team.team_rank();
-  iType j_end   = loop_boundaries.end;
-  iType j_step  = loop_boundaries.team.team_size();
+  iType threadIdx = loop_boundaries.team.team_rank();
+  iType j_start   = threadIdx + loop_boundaries.start;
+  iType j_end     = loop_boundaries.end;
+  iType j_step    = loop_boundaries.team.team_size();
   for (iType j = j_start; j < j_end; j += j_step) {
-    if (j >= loop_boundaries.start) {
-      lambda(j);
-    }
+    lambda(j);
   }
 }
 
@@ -108,14 +107,13 @@ KOKKOS_INLINE_FUNCTION void parallel_for(
     const Impl::ThreadVectorRangeBoundariesStruct<
         iType, Impl::NextSiliconTeamMember>& loop_boundaries,
     const Lambda& lambda) {
-  iType j_start =
+  iType vectorIdx =
       nsapi_team_get_thread_index() % loop_boundaries.team.vector_length();
-  iType j_end  = loop_boundaries.end;
-  iType j_step = loop_boundaries.team.vector_length();
+  iType j_start = loop_boundaries.start + vectorIdx;
+  iType j_end   = loop_boundaries.end;
+  iType j_step  = loop_boundaries.team.vector_length();
   for (iType j = j_start; j < j_end; j += j_step) {
-    if (j >= loop_boundaries.start) {
-      lambda(j);
-    }
+    lambda(j);
   }
 }
 
@@ -125,14 +123,12 @@ KOKKOS_INLINE_FUNCTION void parallel_for(
     const Impl::TeamVectorRangeBoundariesStruct<
         iType, Impl::NextSiliconTeamMember>& loop_boundaries,
     const Lambda& lambda) {
-  iType j_start = nsapi_team_get_thread_index();
+  iType j_start = loop_boundaries.start + nsapi_team_get_thread_index();
   iType j_end   = loop_boundaries.end;
   iType j_step =
       loop_boundaries.team.vector_length() * loop_boundaries.team.team_size();
   for (iType j = j_start; j < j_end; j += j_step) {
-    if (j >= loop_boundaries.start) {
-      lambda(j);
-    }
+    lambda(j);
   }
 }
 
