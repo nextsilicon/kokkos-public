@@ -30,8 +30,8 @@ parallel_scan(const Impl::ThreadVectorRangeBoundariesStruct<
               const Lambda& lambda, const ReducerType& reducer) {
   using value_type = typename ReducerType::value_type;
   using functor_analysis_type =
-      typename Impl::FunctorAnalysis<Impl::FunctorPatternInterface::REDUCE,
-                                     void, ReducerType, value_type>;
+      typename Impl::FunctorAnalysis<Impl::FunctorPatternInterface::SCAN, void,
+                                     ReducerType, value_type>;
   using WrappedReducer = typename functor_analysis_type::Reducer;
   if (0 ==
       nsapi_team_get_thread_index() % loop_boundaries.team.vector_length()) {
