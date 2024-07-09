@@ -56,8 +56,9 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
   using FunctorType  = typename CombinedFunctorReducerType::functor_type;
   using ReducerType  = typename CombinedFunctorReducerType::reducer_type;
 
-  using Pointer   = typename ReducerType::pointer_type;
-  using ValueType = typename ReducerType::value_type;
+  using Pointer       = typename ReducerType::pointer_type;
+  using ValueType     = typename ReducerType::value_type;
+  using ReferenceType = typename ReducerType::reference_type;
 
   CombinedFunctorReducerType m_functor_reducer;
   Policy m_policy;
@@ -86,7 +87,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     if (end <= begin) {
       ValueType val;
       reducer.init(&val);
-      *m_result_ptr = val;
+      reducer.copy(m_result_ptr, &val);
       return;
     }
 
@@ -95,9 +96,12 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
       uint32_t team_size        = nsapi_team_get_optimal_size(
           reinterpret_cast<void*>(microtask), num_iterations);
 
+      size_t scratch_memory_byte_size =
+          team_size * sizeof(ValueType) * reducer.value_count();
+
       // TODO: Cache this allocation in the instance
       ValueType* values = reinterpret_cast<ValueType*>(
-          memory_space().allocate(team_size * sizeof(ValueType)));
+          memory_space().allocate(scratch_memory_byte_size));
 
       uint32_t* counter = reinterpret_cast<uint32_t*>(
           memory_space().allocate(sizeof(uint32_t)));
@@ -111,7 +115,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
           &functor, &reducer, &m_policy, values, counter, m_result_ptr);
 
       // TODO: When moving to instance memory, don't deallocate
-      memory_space().deallocate(values, team_size * sizeof(ValueType));
+      memory_space().deallocate(values, scratch_memory_byte_size);
       memory_space().deallocate(counter, sizeof(*counter));
 
       // TODO: Fence if !m_result_ptr_on_device - not needed for now as
@@ -135,13 +139,13 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     const auto iend = range.end();
 
     ValueType val;
-    reducer->init(&val);
+    ReferenceType ref = reducer->init(&val);
 
     for (auto i = ibeg; i < iend; ++i) {
       if constexpr (std::is_void_v<WorkTag>) {
-        (*functor)(i, val);
+        (*functor)(i, ref);
       } else {
-        (*functor)(WorkTag{}, i, val);
+        (*functor)(WorkTag{}, i, ref);
       }
     }
 
@@ -162,7 +166,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
       reducer->join(&result_arr[0], &result_arr[i]);
     }
     reducer->final(&result_arr[0]);
-    *result_ptr = result_arr[0];
+    reducer->copy(result_ptr, &result_arr[0]);
   }
 };
 
