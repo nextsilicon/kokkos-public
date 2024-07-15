@@ -121,9 +121,10 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
       // TODO: Fence if !m_result_ptr_on_device - not needed for now as
       // nsapi_team_spawn is always sync.
     } else {
-      ValueType value;
+      ValueType* value = reinterpret_cast<ValueType*>(
+          alloca(sizeof(ValueType) * reducer.value_count()));
       uint32_t counter = 0;
-      microtask(&functor, &reducer, &m_policy, &value, &counter, m_result_ptr);
+      microtask(&functor, &reducer, &m_policy, value, &counter, m_result_ptr);
     }
   }
 
@@ -135,11 +136,13 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     uint32_t team_size    = nsapi_team_get_team_size();
 
     WorkRange range(*policy, thread_index, team_size);
-    const auto ibeg = range.begin();
-    const auto iend = range.end();
+    const auto ibeg  = range.begin();
+    const auto iend  = range.end();
+    auto value_count = reducer->value_count();
 
-    ValueType val;
-    ReferenceType ref = reducer->init(&val);
+    ValueType* val =
+        reinterpret_cast<ValueType*>(alloca(sizeof(ValueType) * value_count));
+    ReferenceType ref = reducer->init(val);
 
     for (auto i = ibeg; i < iend; ++i) {
       if constexpr (std::is_void_v<WorkTag>) {
@@ -149,7 +152,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
       }
     }
 
-    result_arr[thread_index] = val;
+    reducer->copy(&result_arr[thread_index * value_count], val);
 
     uint32_t counter_val = __atomic_add_fetch(counter, 1, __ATOMIC_ACQ_REL);
     if (counter_val < team_size) {
@@ -163,7 +166,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     // performance is better
 #pragma ns location risc
     for (uint32_t i = 1; i < team_size; ++i) {
-      reducer->join(&result_arr[0], &result_arr[i]);
+      reducer->join(&result_arr[0], &result_arr[i * value_count]);
     }
     reducer->final(&result_arr[0]);
     reducer->copy(result_ptr, &result_arr[0]);
