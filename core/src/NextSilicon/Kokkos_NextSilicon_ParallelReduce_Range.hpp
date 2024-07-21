@@ -47,14 +47,13 @@ template <class CombinedFunctorReducerType, class... Traits>
 class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
                                    Kokkos::RangePolicy<Traits...>,
                                    Kokkos::Experimental::NextSilicon> {
-  using ExecSpace    = Kokkos::Experimental::NextSilicon;
-  using memory_space = typename ExecSpace::memory_space;
-  using Policy       = RangePolicy<Traits...>;
-  using WorkTag      = typename Policy::work_tag;
-  using WorkRange    = typename Policy::WorkRange;
-  using Member       = typename Policy::member_type;
-  using FunctorType  = typename CombinedFunctorReducerType::functor_type;
-  using ReducerType  = typename CombinedFunctorReducerType::reducer_type;
+  using ExecSpace   = Kokkos::Experimental::NextSilicon;
+  using MemorySpace = typename ExecSpace::memory_space;
+  using Policy      = RangePolicy<Traits...>;
+  using WorkTag     = typename Policy::work_tag;
+  using WorkRange   = typename Policy::WorkRange;
+  using FunctorType = typename CombinedFunctorReducerType::functor_type;
+  using ReducerType = typename CombinedFunctorReducerType::reducer_type;
 
   using Pointer       = typename ReducerType::pointer_type;
   using ValueType     = typename ReducerType::value_type;
@@ -101,10 +100,10 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
 
       // TODO: Cache this allocation in the instance
       ValueType* values = reinterpret_cast<ValueType*>(
-          memory_space().allocate(scratch_memory_byte_size));
+          MemorySpace().allocate(scratch_memory_byte_size));
 
-      uint32_t* counter = reinterpret_cast<uint32_t*>(
-          memory_space().allocate(sizeof(uint32_t)));
+      uint32_t* counter =
+          reinterpret_cast<uint32_t*>(MemorySpace().allocate(sizeof(uint32_t)));
       // TODO: When moved to fixed allocation in instance, memset once.
       *counter = 0;
 
@@ -115,8 +114,8 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
           &functor, &reducer, &m_policy, values, counter, m_result_ptr);
 
       // TODO: When moving to instance memory, don't deallocate
-      memory_space().deallocate(values, scratch_memory_byte_size);
-      memory_space().deallocate(counter, sizeof(*counter));
+      MemorySpace().deallocate(values, scratch_memory_byte_size);
+      MemorySpace().deallocate(counter, sizeof(*counter));
 
       // TODO: Fence if !m_result_ptr_on_device - not needed for now as
       // nsapi_team_spawn is always sync.
