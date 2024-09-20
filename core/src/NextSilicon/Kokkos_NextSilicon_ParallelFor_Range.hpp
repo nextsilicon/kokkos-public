@@ -44,7 +44,8 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
   ParallelFor(Functor const& functor, Policy const& policy)
       : m_functor(functor), m_policy(policy) {}
 
-#pragma ns mark boundary
+  // FIXME_NEXTSILICON: This pragma should eventually not be necessary.
+#pragma ns mark import_recursive
   __attribute__((noinline)) void execute() const {
     // FIXME_NEXTSILICON: Add a dynamic schedule policy check if `typename
     // Policy::schedule_type::type` is Kokkos::Static or Kokkos::Dynamic
