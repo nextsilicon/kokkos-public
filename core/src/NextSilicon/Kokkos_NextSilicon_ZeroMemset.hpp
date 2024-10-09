@@ -28,14 +28,10 @@ namespace Impl {
 
 void ZeroMemsetNextSilicon(void* buffer, size_t buffer_size);
 
-template <class T, class... P>
-struct ZeroMemset<Kokkos::Experimental::NextSiliconSpace::execution_space,
-                  View<T, P...>> {
-  ZeroMemset(
-      const Kokkos::Experimental::NextSiliconSpace::execution_space& exec,
-      const View<T, P...>& dst) {
-    using ValueType = typename View<T, P...>::value_type;
-    ZeroMemsetNextSilicon(dst.data(), sizeof(ValueType) * dst.size());
+template <>
+struct ZeroMemset<Kokkos::Experimental::NextSilicon> {
+  ZeroMemset(const Kokkos::Experimental::NextSilicon& exec_space, void* dst, size_t cnt) {
+    ZeroMemsetNextSilicon(dst, cnt);
   }
 };
 
