@@ -194,7 +194,8 @@ static_assert(Kokkos::Impl::MemorySpaceAccess<
 template <>
 struct MemorySpaceAccess<Kokkos::HostSpace,
                          Kokkos::Experimental::NextSiliconSpace> {
-  enum : bool { assignable = true };
+  // FIXME_NEXTSILICON: this could be true, but it causes the host mirror space for nextsilicon to be nextsilicon, which causes some unit tests to fail.
+  enum : bool { assignable = false }; // NextSiliconSpace::execution_space != HostSpace::execution_space
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
@@ -202,7 +203,7 @@ struct MemorySpaceAccess<Kokkos::HostSpace,
 template <>
 struct MemorySpaceAccess<Kokkos::HostSpace,
                          Kokkos::Experimental::NextSiliconManagedSpace> {
-  enum : bool { assignable = true };
+  enum : bool { assignable = false }; // NextSiliconSpace::execution_space != HostSpace::execution_space
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
@@ -210,8 +211,8 @@ struct MemorySpaceAccess<Kokkos::HostSpace,
 template <>
 struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
                          Kokkos::HostSpace> {
-  enum : bool { assignable = true };
-  enum : bool { accessible = true };
+  enum : bool { assignable = false };
+  enum : bool { accessible = false };
   enum : bool { deepcopy = true };
 };
 
@@ -226,7 +227,7 @@ struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
 template <>
 struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconManagedSpace,
                          Kokkos::HostSpace> {
-  enum : bool { assignable = true };
+  enum : bool { assignable = false };
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
