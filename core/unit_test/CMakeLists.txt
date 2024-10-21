@@ -1088,12 +1088,15 @@ kokkos_add_test_executable(
   TestStackTrace_f3.cpp
   TestStackTrace_f4.cpp
 )
-endif()
+
 # We need -rdynamic on GNU platforms for the stacktrace functionality
 # to work correctly with shared libraries
 kokkos_set_exe_property(StackTraceTestExec ENABLE_EXPORTS ON)
 
 kokkos_add_test(NAME CoreUnitTest_StackTraceTest EXE StackTraceTestExec FAIL_REGULAR_EXPRESSION "FAILED")
+
+endif()
+
 
 if(KOKKOS_ENABLE_HWLOC)
   kokkos_add_executable_and_test(CoreUnitTest_HWLOC SOURCES UnitTestMain.cpp TestHWLOC.cpp)

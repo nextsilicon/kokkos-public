@@ -77,6 +77,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
 
   // FIXME_NEXTSILICON: This pragma should eventually not be necessary.
 #pragma ns mark import_recursive
+// #pragma ns mark boundary
   __attribute__((noinline)) void execute() const {
     auto const begin = m_policy.begin();
     auto const end   = m_policy.end();
