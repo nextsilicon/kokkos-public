@@ -74,7 +74,8 @@ parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
                 const Lambda& lambda, const ReducerType& reducer) {
   using value_type     = typename ReducerType::value_type;
   using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
-      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, ReducerType,
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, 
+      TeamPolicy<typename Impl::NextSiliconTeamMember::execution_space>, ReducerType,
       value_type>::Reducer;
 
   if (0 == loop_boundaries.team.team_rank()) {
@@ -85,7 +86,7 @@ parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
     for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
       lambda(i, val);
     wrappedReducer.final(&val);
-    wrappedReducer.reference() = val;
+    reducer.reference() = val; // wrappedReducer.reference() = val;
   }
 }
 template <typename iType, class Lambda, typename ValueType>
@@ -94,7 +95,8 @@ parallel_reduce(const Impl::TeamThreadRangeBoundariesStruct<
                     iType, Impl::NextSiliconTeamMember>& loop_boundaries,
                 const Lambda& lambda, ValueType& result) {
   using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
-      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, 
+      TeamPolicy<typename Impl::NextSiliconTeamMember::execution_space>, Lambda,
       ValueType>::Reducer;
 
   static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>);
@@ -119,7 +121,8 @@ parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
                 const Lambda& lambda, const ReducerType& reducer) {
   using value_type     = typename ReducerType::value_type;
   using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
-      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, ReducerType,
+      Kokkos::Impl::FunctorPatternInterface::REDUCE,
+      TeamPolicy<typename Impl::NextSiliconTeamMember::execution_space>, ReducerType,
       value_type>::Reducer;
 
   if (0 ==
@@ -131,7 +134,7 @@ parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
     for (iType i = loop_boundaries.start; i < loop_boundaries.end; i++)
       lambda(i, val);
     wrappedReducer.final(&val);
-    wrappedReducer.reference() = val;
+    reducer.reference() = val; // wrappedReducer.reference() = val;
   }
 }
 template <typename iType, class Lambda, typename ValueType>
@@ -140,7 +143,8 @@ parallel_reduce(const Impl::ThreadVectorRangeBoundariesStruct<
                     iType, Impl::NextSiliconTeamMember>& loop_boundaries,
                 const Lambda& lambda, ValueType& result) {
   using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
-      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, 
+      TeamPolicy<typename Impl::NextSiliconTeamMember::execution_space>, Lambda,
       ValueType>::Reducer;
 
   static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>);
@@ -166,7 +170,9 @@ parallel_reduce(const Impl::TeamVectorRangeBoundariesStruct<
                 const Lambda& lambda, const ReducerType& reducer) {
   using value_type     = typename ReducerType::value_type;
   using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
-      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, ReducerType,
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, 
+      TeamPolicy<typename Impl::NextSiliconTeamMember::execution_space>,
+      ReducerType,
       value_type>::Reducer;
 
   if (0 == nsapi_team_get_thread_index()) {
@@ -186,7 +192,8 @@ parallel_reduce(const Impl::TeamVectorRangeBoundariesStruct<
                     iType, Impl::NextSiliconTeamMember>& loop_boundaries,
                 const Lambda& lambda, ValueType& result) {
   using WrappedReducer = typename Kokkos::Impl::FunctorAnalysis<
-      Kokkos::Impl::FunctorPatternInterface::REDUCE, void, Lambda,
+      Kokkos::Impl::FunctorPatternInterface::REDUCE, 
+      TeamPolicy<typename Impl::NextSiliconTeamMember::execution_space>, Lambda,
       ValueType>::Reducer;
 
   static_assert(std::is_same_v<ValueType, typename WrappedReducer::value_type>);
