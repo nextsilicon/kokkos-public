@@ -127,6 +127,12 @@ if(Kokkos_ENABLE_OPENMPTARGET)
   )
 endif()
 
+if(Kokkos_ENABLE_NEXTSILICON)
+  # FIXME_NEXTSILICON: MDRange parallel_reduce
+  list(REMOVE_ITEM BENCHMARK_SOURCES PerfTest_ExecSpacePartitioning.cpp
+  )
+endif()
+
 kokkos_add_benchmark(PerformanceTest_Benchmark SOURCES ${BENCHMARK_SOURCES})
 
 kokkos_add_benchmark(Benchmark_Atomic_MinMax SOURCES test_atomic_minmax_simple.cpp)
