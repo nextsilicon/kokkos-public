@@ -178,8 +178,12 @@ constexpr bool test_view_typedefs(ViewParams<T, ViewArgs...>) {
                                  T, L, S, M, HostMirrorSpace, ValueType, ReferenceType>();
 }
 
-
+// FIXME_NEXTSILICON: NextSilicon basically acts like a host space, where host can access NextSiliconSpace and vis versa.
+#if defined(KOKKOS_ENABLE_NEXTSILICON)
+constexpr bool is_host_exec = true;
+#else
 constexpr bool is_host_exec = std::is_same_v<Kokkos::DefaultExecutionSpace, Kokkos::DefaultHostExecutionSpace>;
+#endif
 
 #if defined(KOKKOS_ENABLE_CUDA_UVM) || defined(KOKKOS_ENABLE_IMPL_CUDA_UNIFIED_MEMORY) || defined(KOKKOS_ENABLE_IMPL_HIP_UNIFIED_MEMORY)
 constexpr bool has_unified_mem_space = true;
