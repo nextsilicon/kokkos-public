@@ -138,7 +138,7 @@ kokkos_enable_option(IMPL_HPX_ASYNC_DISPATCH ${HPX_ASYNC_DISPATCH_DEFAULT} "Whet
 
 kokkos_enable_option(IMPL_NSAPI_UNAVAIL OFF "Whether new NSAPI version is available or not")
 kokkos_enable_option(IMPL_NSAPI_ADD_TELEM_REGIONS OFF "Whether to wrap NextSilicon instance in telem regions")
-kokkos_enable_option(IMPL_NEXTSILICON_UNIFIED_MEMORY OFF "Whether to use NextSiliconSharedSpace for NextSilicon by default")
+kokkos_enable_option(IMPL_NEXTSILICON_UNIFIED_MEMORY ON "Whether to use NextSiliconSharedSpace for NextSilicon by default")
 
 kokkos_enable_option(UNSUPPORTED_ARCHS OFF "Whether to allow architectures in backends Kokkos doesn't optimize for")
 
