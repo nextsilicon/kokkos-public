@@ -106,15 +106,15 @@ struct Impl::is_nextsilicon_type_space<NextSiliconSpace>
 
 namespace Kokkos::Experimental {
 
-class NextSiliconManagedSpace {
+class NextSiliconSharedSpace {
  public:
-  using memory_space    = NextSiliconManagedSpace;
+  using memory_space    = NextSiliconSharedSpace;
   using execution_space = NextSilicon;
   using device_type     = Kokkos::Device<execution_space, memory_space>;
 
   using size_type = size_t;
 
-  NextSiliconManagedSpace() = default;
+  NextSiliconSharedSpace() = default;
 
   /**\brief  Allocate untracked memory in the space */
   template <typename ExecutionSpace>
@@ -139,7 +139,7 @@ class NextSiliconManagedSpace {
                   const size_t arg_alloc_size,
                   const size_t arg_logical_size = 0) const;
 
-  static constexpr char const* name() { return "NextSiliconManagedSpace"; }
+  static constexpr char const* name() { return "NextSiliconSharedSpace"; }
 
  private:
   template <typename ExecutionSpace>
@@ -166,7 +166,7 @@ class NextSiliconManagedSpace {
 };
 
 template <>
-struct Impl::is_nextsilicon_type_space<NextSiliconManagedSpace>
+struct Impl::is_nextsilicon_type_space<NextSiliconSharedSpace>
     : public std::true_type {};
 
 }  // namespace Kokkos::Experimental
@@ -181,12 +181,16 @@ static_assert(Kokkos::Impl::MemorySpaceAccess<
               Experimental::NextSiliconSpace>::assignable);
 
 static_assert(Kokkos::Impl::MemorySpaceAccess<
-              Experimental::NextSiliconManagedSpace,
-              Experimental::NextSiliconManagedSpace>::assignable);
+              Experimental::NextSiliconSharedSpace,
+              Experimental::NextSiliconSharedSpace>::assignable);
+
+// NextSiliconSpace is semantically a device-only space.
+// This is the default space, where data movement ends up only being through
+// deep-copy.
 
 // Limit access and assignment from HostSpace to NextSiliconSpace
 // NextSiliconSpace::execution_space can always access and assign Host memory.
-// NextSiliconManagedSpace accessible and assignable from everywhere.
+// NextSiliconSharedSpace accessible and assignable from everywhere.
 
 // FIXME_NEXTSILICON Set Device space to be assignable and accessible from
 //  host space (which is slow but works without a fault) because of missing
@@ -194,17 +198,8 @@ static_assert(Kokkos::Impl::MemorySpaceAccess<
 template <>
 struct MemorySpaceAccess<Kokkos::HostSpace,
                          Kokkos::Experimental::NextSiliconSpace> {
-  // FIXME_NEXTSILICON: this could be true, but it causes the host mirror space for nextsilicon to be nextsilicon, which causes some unit tests to fail.
-  enum : bool { assignable = false }; // NextSiliconSpace::execution_space != HostSpace::execution_space
-  enum : bool { accessible = true };
-  enum : bool { deepcopy = true };
-};
-
-template <>
-struct MemorySpaceAccess<Kokkos::HostSpace,
-                         Kokkos::Experimental::NextSiliconManagedSpace> {
-  enum : bool { assignable = false }; // NextSiliconSpace::execution_space != HostSpace::execution_space
-  enum : bool { accessible = true };
+  enum : bool { assignable = false };
+  enum : bool { accessible = false };
   enum : bool { deepcopy = true };
 };
 
@@ -217,23 +212,38 @@ struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
 };
 
 template <>
+struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSharedSpace,
+                         Kokkos::HostSpace> {
+  enum : bool { assignable = false };
+  enum : bool {
+    accessible = false
+  };  // This is a lie, because NextSilicon can access HostSpace. Set this way
+      // so the HostMirror of NextSiliconSharedSpace uses the host execution
+      // space.
+  enum : bool { deepcopy = true };
+};
+
+template <>
+struct MemorySpaceAccess<Kokkos::HostSpace,
+                         Kokkos::Experimental::NextSiliconSharedSpace> {
+  enum : bool { assignable = false };
+  enum : bool {
+    accessible = true
+  };  // Unlike <NextSiliconSharedSpace, HostSpace>, this is true so that
+      // HostMirror uses NextSiliconSharedSpace as the memory space
+  enum : bool { deepcopy = true };
+};
+
+template <>
 struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSpace,
-                         Kokkos::Experimental::NextSiliconManagedSpace> {
+                         Kokkos::Experimental::NextSiliconSharedSpace> {
   enum : bool { assignable = true };
   enum : bool { accessible = true };
   enum : bool { deepcopy = true };
 };
 
 template <>
-struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconManagedSpace,
-                         Kokkos::HostSpace> {
-  enum : bool { assignable = false };
-  enum : bool { accessible = true };
-  enum : bool { deepcopy = true };
-};
-
-template <>
-struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconManagedSpace,
+struct MemorySpaceAccess<Kokkos::Experimental::NextSiliconSharedSpace,
                          Kokkos::Experimental::NextSiliconSpace> {
   enum : bool { assignable = true };
   enum : bool { accessible = true };

@@ -44,8 +44,12 @@ class NextSilicon {
 
  public:
   using execution_space = NextSilicon;
-  using memory_space    = Kokkos::Experimental::NextSiliconSpace;
-  using device_type     = Kokkos::Device<execution_space, memory_space>;
+#if defined(KOKKOS_ENABLE_IMPL_NEXTSILICON_UNIFIED_MEMORY)
+  using memory_space = Kokkos::Experimental::NextSiliconSharedSpace;
+#else
+  using memory_space = Kokkos::Experimental::NextSiliconSpace;
+#endif
+  using device_type = Kokkos::Device<execution_space, memory_space>;
 
   using array_layout = LayoutLeft;
   using size_type    = memory_space::size_type;

@@ -96,17 +96,17 @@ void NextSiliconSpace::impl_deallocate(
   }
 }
 
-void *NextSiliconManagedSpace::allocate(const size_t arg_alloc_size) const {
+void *NextSiliconSharedSpace::allocate(const size_t arg_alloc_size) const {
   return allocate("[unlabeled]", arg_alloc_size);
 }
 
-void *NextSiliconManagedSpace::allocate(const char *arg_label,
-                                        const size_t arg_alloc_size,
-                                        const size_t arg_logical_size) const {
+void *NextSiliconSharedSpace::allocate(const char *arg_label,
+                                       const size_t arg_alloc_size,
+                                       const size_t arg_logical_size) const {
   return impl_allocate(arg_label, arg_alloc_size, arg_logical_size);
 }
 
-void *NextSiliconManagedSpace::impl_allocate(
+void *NextSiliconSharedSpace::impl_allocate(
     const char *arg_label, const size_t arg_alloc_size,
     const size_t arg_logical_size,
     const Kokkos::Tools::SpaceHandle arg_handle) const {
@@ -126,19 +126,19 @@ void *NextSiliconManagedSpace::impl_allocate(
   return ptr;
 }
 
-void NextSiliconManagedSpace::deallocate(void *const arg_alloc_ptr,
-                                         const size_t arg_alloc_size) const {
+void NextSiliconSharedSpace::deallocate(void *const arg_alloc_ptr,
+                                        const size_t arg_alloc_size) const {
   deallocate("[unlabeled]", arg_alloc_ptr, arg_alloc_size);
 }
 
-void NextSiliconManagedSpace::deallocate(const char *arg_label,
-                                         void *const arg_alloc_ptr,
-                                         const size_t arg_alloc_size,
-                                         const size_t arg_logical_size) const {
+void NextSiliconSharedSpace::deallocate(const char *arg_label,
+                                        void *const arg_alloc_ptr,
+                                        const size_t arg_alloc_size,
+                                        const size_t arg_logical_size) const {
   impl_deallocate(arg_label, arg_alloc_ptr, arg_alloc_size, arg_logical_size);
 }
 
-void NextSiliconManagedSpace::impl_deallocate(
+void NextSiliconSharedSpace::impl_deallocate(
     const char *arg_label, void *const arg_alloc_ptr,
     const size_t arg_alloc_size, const size_t arg_logical_size,
     const Kokkos::Tools::SpaceHandle arg_handle) const {

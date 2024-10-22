@@ -108,8 +108,8 @@ struct DeepCopy<Kokkos::HostSpace, Kokkos::Experimental::NextSiliconSpace,
 };
 
 template <>
-struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
-                Kokkos::Experimental::NextSiliconManagedSpace,
+struct DeepCopy<Kokkos::Experimental::NextSiliconSharedSpace,
+                Kokkos::Experimental::NextSiliconSharedSpace,
                 Kokkos::Experimental::NextSilicon> {
   DeepCopy(void* dst, const void* src, size_t n) {
     DeepCopySharedNextSilicon(dst, src, n);
@@ -121,8 +121,8 @@ struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
 };
 
 template <class ExecutionSpace>
-struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
-                Kokkos::Experimental::NextSiliconManagedSpace, ExecutionSpace> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSharedSpace,
+                Kokkos::Experimental::NextSiliconSharedSpace, ExecutionSpace> {
   DeepCopy(void* dst, const void* src, size_t n) {
     DeepCopySharedNextSilicon(dst, src, n);
   }
@@ -135,8 +135,8 @@ struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
 };
 
 template <>
-struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
-                Kokkos::HostSpace, Kokkos::Experimental::NextSilicon> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSharedSpace, Kokkos::HostSpace,
+                Kokkos::Experimental::NextSilicon> {
   DeepCopy(void* dst, const void* src, size_t n) {
     DeepCopySharedNextSilicon(dst, src, n);
   }
@@ -147,8 +147,8 @@ struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
 };
 
 template <class ExecutionSpace>
-struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
-                Kokkos::HostSpace, ExecutionSpace> {
+struct DeepCopy<Kokkos::Experimental::NextSiliconSharedSpace, Kokkos::HostSpace,
+                ExecutionSpace> {
   DeepCopy(void* dst, const void* src, size_t n) {
     DeepCopySharedNextSilicon(dst, src, n);
   }
@@ -161,8 +161,7 @@ struct DeepCopy<Kokkos::Experimental::NextSiliconManagedSpace,
 };
 
 template <>
-struct DeepCopy<Kokkos::HostSpace,
-                Kokkos::Experimental::NextSiliconManagedSpace,
+struct DeepCopy<Kokkos::HostSpace, Kokkos::Experimental::NextSiliconSharedSpace,
                 Kokkos::Experimental::NextSilicon> {
   DeepCopy(void* dst, const void* src, size_t n) {
     DeepCopySharedNextSilicon(dst, src, n);
@@ -174,8 +173,8 @@ struct DeepCopy<Kokkos::HostSpace,
 };
 
 template <class ExecutionSpace>
-struct DeepCopy<Kokkos::HostSpace,
-                Kokkos::Experimental::NextSiliconManagedSpace, ExecutionSpace> {
+struct DeepCopy<Kokkos::HostSpace, Kokkos::Experimental::NextSiliconSharedSpace,
+                ExecutionSpace> {
   DeepCopy(void* dst, const void* src, size_t n) {
     DeepCopySharedNextSilicon(dst, src, n);
   }

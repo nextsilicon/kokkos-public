@@ -164,10 +164,10 @@ using SharedSpace = CudaUVMSpace;
 using SharedSpace = HIPManagedSpace;
 #define KOKKOS_HAS_SHARED_SPACE
 #elif defined(KOKKOS_ENABLE_SYCL)
-using SharedSpace = SYCLSharedUSMSpace;
+using SharedSpace               = SYCLSharedUSMSpace;
 #define KOKKOS_HAS_SHARED_SPACE
 #elif defined(KOKKOS_ENABLE_NEXTSILICON)
-using SharedSpace = Experimental::NextSiliconManagedSpace;
+using SharedSpace = Experimental::NextSiliconSharedSpace;
 #define KOKKOS_HAS_SHARED_SPACE
 // if only host compile point to HostSpace
 #elif !defined(KOKKOS_ENABLE_OPENACC) && !defined(KOKKOS_ENABLE_OPENMPTARGET)

@@ -138,6 +138,7 @@ kokkos_enable_option(IMPL_HPX_ASYNC_DISPATCH ${HPX_ASYNC_DISPATCH_DEFAULT} "Whet
 
 kokkos_enable_option(IMPL_NSAPI_UNAVAIL OFF "Whether new NSAPI version is available or not")
 kokkos_enable_option(IMPL_NSAPI_ADD_TELEM_REGIONS OFF "Whether to wrap NextSilicon instance in telem regions")
+kokkos_enable_option(IMPL_NEXTSILICON_UNIFIED_MEMORY OFF "Whether to use NextSiliconSharedSpace for NextSilicon by default")
 
 kokkos_enable_option(UNSUPPORTED_ARCHS OFF "Whether to allow architectures in backends Kokkos doesn't optimize for")
 
@@ -181,8 +182,14 @@ check_device_specific_options(
 )
 check_device_specific_options(DEVICE HPX OPTIONS IMPL_HPX_ASYNC_DISPATCH)
 check_device_specific_options(DEVICE OPENACC OPTIONS OPENACC_FORCE_HOST_AS_DEVICE)
-check_device_specific_options(DEVICE NEXTSILICON OPTIONS IMPL_NSAPI_UNAVAIL)
-check_device_specific_options(DEVICE NEXTSILICON OPTIONS IMPL_NSAPI_ADD_TELEM_REGIONS)
+check_device_specific_options(
+  DEVICE 
+  NEXTSILICON 
+  OPTIONS 
+  IMPL_NSAPI_UNAVAIL
+  IMPL_NSAPI_ADD_TELEM_REGIONS
+  IMPL_NEXTSILICON_UNIFIED_MEMORY
+)
 
 # Needed due to change from deprecated name to new header define name
 if(KOKKOS_ENABLE_AGGRESSIVE_VECTORIZATION)

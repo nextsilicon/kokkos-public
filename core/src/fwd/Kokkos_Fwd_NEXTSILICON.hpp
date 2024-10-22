@@ -19,10 +19,10 @@
 
 #if defined(KOKKOS_ENABLE_NEXTSILICON)
 namespace Kokkos::Experimental {
-class NextSilicon;              ///< NextSilicon execution space.
-class NextSiliconSpace;         ///< Memory space on NextSilicon accelerator
-class NextSiliconManagedSpace;  ///< Memory migratable between Host and
-                                ///< NextSilicon accelerator
+class NextSilicon;             ///< NextSilicon execution space.
+class NextSiliconSpace;        ///< Memory space on NextSilicon accelerator
+class NextSiliconSharedSpace;  ///< Memory migratable between Host and
+                               ///< NextSilicon accelerator
 }  // namespace Kokkos::Experimental
 #endif
 #endif

@@ -23,4 +23,4 @@
 KOKKOS_IMPL_SHARED_ALLOCATION_RECORD_EXPLICIT_INSTANTIATION(
     Kokkos::Experimental::NextSiliconSpace);
 KOKKOS_IMPL_SHARED_ALLOCATION_RECORD_EXPLICIT_INSTANTIATION(
-    Kokkos::Experimental::NextSiliconManagedSpace);
+    Kokkos::Experimental::NextSiliconSharedSpace);

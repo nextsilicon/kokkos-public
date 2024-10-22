@@ -23,6 +23,6 @@
 KOKKOS_IMPL_SHARED_ALLOCATION_SPECIALIZATION(
     Kokkos::Experimental::NextSiliconSpace);
 KOKKOS_IMPL_SHARED_ALLOCATION_SPECIALIZATION(
-    Kokkos::Experimental::NextSiliconManagedSpace);
+    Kokkos::Experimental::NextSiliconSharedSpace);
 
 #endif
