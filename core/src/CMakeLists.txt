@@ -92,10 +92,10 @@ if(KOKKOS_ENABLE_SYCL)
   append_glob(KOKKOS_CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/SYCL/*.hpp)
 endif()
 
-IF (KOKKOS_ENABLE_NEXTSILICON)
+if(KOKKOS_ENABLE_NEXTSILICON)
   append_glob(KOKKOS_CORE_SRCS ${CMAKE_CURRENT_SOURCE_DIR}/NextSilicon/*.cpp)
   append_glob(KOKKOS_CORE_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/NextSilicon/*.hpp)
-ENDIF()
+endif()
 
 if(NOT desul_FOUND)
   if(KOKKOS_ENABLE_CUDA)
@@ -183,7 +183,7 @@ if(NOT KOKKOS_ENABLE_COMPILE_AS_CMAKE_LANGUAGE)
   kokkos_link_tpl(kokkoscore PUBLIC ROCM)
 endif()
 
-KOKKOS_LINK_TPL(kokkoscore PUBLIC NSAPI)
+kokkos_link_tpl(kokkoscore PUBLIC NSAPI)
 
 # FIXME: We need a proper solution to figure out whether to enable
 #        libatomic

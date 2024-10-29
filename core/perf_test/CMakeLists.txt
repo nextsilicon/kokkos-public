@@ -129,8 +129,7 @@ endif()
 
 if(Kokkos_ENABLE_NEXTSILICON)
   # FIXME_NEXTSILICON: MDRange parallel_reduce
-  list(REMOVE_ITEM BENCHMARK_SOURCES PerfTest_ExecSpacePartitioning.cpp
-  )
+  list(REMOVE_ITEM BENCHMARK_SOURCES PerfTest_ExecSpacePartitioning.cpp)
 endif()
 
 kokkos_add_benchmark(PerformanceTest_Benchmark SOURCES ${BENCHMARK_SOURCES})

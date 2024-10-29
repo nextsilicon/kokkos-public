@@ -63,8 +63,8 @@ else()
   set(KOKKOS_OPENACC_FEATURE_LEVEL 17)
 endif()
 
-SET(KOKKOS_NEXTSILICON_FEATURE_LEVEL 11)
-SET(KOKKOS_NEXTSILICON_NAME Experimental::NextSilicon)
+set(KOKKOS_NEXTSILICON_FEATURE_LEVEL 11)
+set(KOKKOS_NEXTSILICON_NAME Experimental::NextSilicon)
 
 set(KOKKOS_OPENACC_NAME Experimental::OpenACC)
 
@@ -228,8 +228,8 @@ foreach(Tag Threads;Serial;OpenMP;Cuda;HPX;OpenMPTarget;OpenACC;NextSilicon;HIP;
         Swap
     )
 
-    if (KOKKOS_ENABLE_NEXTSILICON)
-      if (Name STREQUAL "MDRangePolicyConstructors") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
+    if(KOKKOS_ENABLE_NEXTSILICON)
+      if(Name STREQUAL "MDRangePolicyConstructors") # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
         continue()
       endif()
     endif()
@@ -686,8 +686,10 @@ if(KOKKOS_ENABLE_OPENACC AND KOKKOS_CXX_COMPILER_ID STREQUAL Clang)
   list(REMOVE_ITEM Serial_SOURCES1 ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_Atomics.cpp)
 endif()
 
-IF(KOKKOS_ENABLE_NEXTSILICON)
-  list(REMOVE_ITEM Serial_SOURCES1
+if(KOKKOS_ENABLE_NEXTSILICON)
+  list(
+    REMOVE_ITEM
+    Serial_SOURCES1
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CommonPolicyConstructors.cpp # FIXME_NEXTSILICON: needs team policy
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_Abort.cpp # FIXME_NEXTSILICON: hang (EXPECT_DEATH?)
     ${CMAKE_CURRENT_BINARY_DIR}/serial/TestSerial_CheckedIntegerOps.cpp # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
@@ -846,14 +848,11 @@ if(Kokkos_ENABLE_SYCL)
   endif()
 endif()
 
-IF(KOKKOS_ENABLE_NEXTSILICON)
-  KOKKOS_ADD_EXECUTABLE_AND_TEST(
-    CoreUnitTest_NextSiliconNsapi
-    SOURCES
-    UnitTestMainInit.cpp
-      nextsilicon/TestNextSilicon_Nsapi_Link.cpp
+if(KOKKOS_ENABLE_NEXTSILICON)
+  kokkos_add_executable_and_test(
+    CoreUnitTest_NextSiliconNsapi SOURCES UnitTestMainInit.cpp nextsilicon/TestNextSilicon_Nsapi_Link.cpp
   )
-ENDIF(KOKKOS_ENABLE_NEXTSILICON)
+endif(KOKKOS_ENABLE_NEXTSILICON)
 
 set(DEFAULT_DEVICE_SOURCES
     UnitTestMainInit.cpp
@@ -886,8 +885,10 @@ if(KOKKOS_ENABLE_OPENACC OR KOKKOS_ENABLE_OPENMPTARGET)
   list(REMOVE_ITEM DEFAULT_DEVICE_SOURCES TestSharedHostPinnedSpace.cpp)
 endif()
 
-if (KOKKOS_ENABLE_NEXTSILICON)
-  LIST(REMOVE_ITEM DEFAULT_DEVICE_SOURCES 
+if(KOKKOS_ENABLE_NEXTSILICON)
+  list(
+    REMOVE_ITEM
+    DEFAULT_DEVICE_SOURCES
     default/TestDefaultDeviceType_a1.cpp # FIXME_NEXTSILICON: needs custom reduction
     default/TestDefaultDeviceType_b1.cpp # FIXME_NEXTSILICON: needs custom reduction
     default/TestDefaultDeviceType_c1.cpp # FIXME_NEXTSILICON: needs custom reduction
@@ -1003,8 +1004,8 @@ if(KOKKOS_ENABLE_LIBDL)
 
   kokkos_add_test_executable(ProfilingAllCalls tools/TestAllCalls.cpp)
 
-  if (NOT KOKKOS_ENABLE_NEXTSILICON)
-  kokkos_add_test_executable(ToolsInitialization UnitTestMain.cpp tools/TestToolsInitialization.cpp)
+  if(NOT KOKKOS_ENABLE_NEXTSILICON)
+    kokkos_add_test_executable(ToolsInitialization UnitTestMain.cpp tools/TestToolsInitialization.cpp)
   endif()
 
   set(ADDRESS_REGEX "0x[0-9a-f]*")
@@ -1078,25 +1079,24 @@ if(KOKKOS_ENABLE_LIBDL)
 endif() #KOKKOS_ENABLE_LIBDL
 # FIXME_NEXTSILICON: hang (ASSERT_DEATH?)
 if(NOT KOKKOS_ENABLE_NEXTSILICON)
-kokkos_add_test_executable(
-  StackTraceTestExec
-  SOURCES
-  TestStackTrace.cpp
-  TestStackTrace_f0.cpp
-  TestStackTrace_f1.cpp
-  TestStackTrace_f2.cpp
-  TestStackTrace_f3.cpp
-  TestStackTrace_f4.cpp
-)
+  kokkos_add_test_executable(
+    StackTraceTestExec
+    SOURCES
+    TestStackTrace.cpp
+    TestStackTrace_f0.cpp
+    TestStackTrace_f1.cpp
+    TestStackTrace_f2.cpp
+    TestStackTrace_f3.cpp
+    TestStackTrace_f4.cpp
+  )
 
-# We need -rdynamic on GNU platforms for the stacktrace functionality
-# to work correctly with shared libraries
-kokkos_set_exe_property(StackTraceTestExec ENABLE_EXPORTS ON)
+  # We need -rdynamic on GNU platforms for the stacktrace functionality
+  # to work correctly with shared libraries
+  kokkos_set_exe_property(StackTraceTestExec ENABLE_EXPORTS ON)
 
-kokkos_add_test(NAME CoreUnitTest_StackTraceTest EXE StackTraceTestExec FAIL_REGULAR_EXPRESSION "FAILED")
+  kokkos_add_test(NAME CoreUnitTest_StackTraceTest EXE StackTraceTestExec FAIL_REGULAR_EXPRESSION "FAILED")
 
 endif()
-
 
 if(KOKKOS_ENABLE_HWLOC)
   kokkos_add_executable_and_test(CoreUnitTest_HWLOC SOURCES UnitTestMain.cpp TestHWLOC.cpp)
