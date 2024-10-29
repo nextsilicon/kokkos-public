@@ -86,6 +86,7 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 #ifndef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 
  private:
+  #pragma ns mark import_recursive
   static void microtask(FunctorWrapper const* __restrict functor,
                         const Policy* policy) {
     // TODO: On the device, the optimizer should turn those calls into

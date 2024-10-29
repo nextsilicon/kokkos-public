@@ -78,8 +78,8 @@ void Kokkos::Experimental::Impl::NextSiliconInternal::fence(
       [&]() {});
 }
 
-uint32_t Kokkos::Experimental::Impl::NextSiliconInternal::instance_id() const
-    noexcept {
+uint32_t Kokkos::Experimental::Impl::NextSiliconInternal::instance_id()
+    const noexcept {
   return Kokkos::Tools::Experimental::Impl::idForInstance<
       Kokkos::Experimental::NextSilicon>(reinterpret_cast<uintptr_t>(this));
 }

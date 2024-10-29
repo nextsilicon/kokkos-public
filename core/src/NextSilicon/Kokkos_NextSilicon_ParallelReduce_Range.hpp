@@ -130,6 +130,7 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
   }
 
  private:
+  // #pragma ns mark import_recursive
   static void microtask(const FunctorType* functor, const ReducerType* reducer,
                         const Policy* policy, ValueType* result_arr,
                         uint32_t* counter, ValueType* result_ptr) {

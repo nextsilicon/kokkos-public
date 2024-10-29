@@ -30,7 +30,8 @@ void ZeroMemsetNextSilicon(void* buffer, size_t buffer_size);
 
 template <>
 struct ZeroMemset<Kokkos::Experimental::NextSilicon> {
-  ZeroMemset(const Kokkos::Experimental::NextSilicon& exec_space, void* dst, size_t cnt) {
+  ZeroMemset(const Kokkos::Experimental::NextSilicon& exec_space, void* dst,
+             size_t cnt) {
     ZeroMemsetNextSilicon(dst, cnt);
   }
 };

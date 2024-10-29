@@ -30,7 +30,7 @@ class FunctorAdapter {
   FunctorAdapter(Functor const &functor) : m_functor(functor) {}
 
   template <class... Args>
-  KOKKOS_FUNCTION void operator()(Args &&... args) const {
+  KOKKOS_FUNCTION void operator()(Args &&...args) const {
     if constexpr (std::is_void_v<WorkTag>) {
       m_functor(static_cast<Args &&>(args)...);
     } else {
