@@ -91,44 +91,38 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
       return;
     }
 
-    if (__nsapi_is_on_cg()) {
-      const auto num_iterations = end - begin;
-      uint32_t team_size        = nsapi_team_get_optimal_size(
-          reinterpret_cast<void*>(microtask), num_iterations);
+    const auto num_iterations = end - begin;
+    uint32_t team_size        = nsapi_team_get_optimal_size(
+        reinterpret_cast<void*>(microtask), num_iterations);
 
-      size_t scratch_memory_byte_size =
-          team_size * sizeof(ValueType) * reducer.value_count();
+    size_t scratch_memory_byte_size =
+        team_size * sizeof(ValueType) * reducer.value_count();
 
-      // TODO: Cache this allocation in the instance
-      ValueType* values = reinterpret_cast<ValueType*>(
-          MemorySpace().allocate(scratch_memory_byte_size));
+    // TODO: Cache this allocation in the instance
+    ValueType* values = reinterpret_cast<ValueType*>(
+        MemorySpace().allocate(scratch_memory_byte_size));
 
-      uint32_t* counter =
-          reinterpret_cast<uint32_t*>(MemorySpace().allocate(sizeof(uint32_t)));
-      // TODO: When moved to fixed allocation in instance, memset once.
-      *counter = 0;
+    uint32_t* counter =
+        reinterpret_cast<uint32_t*>(MemorySpace().allocate(sizeof(uint32_t)));
+    // TODO: When moved to fixed allocation in instance, memset once.
+    *counter = 0;
 
-      nsapi_team_spawn(
-          reinterpret_cast<void*>(microtask), team_size,
-          /* memory_size */ 0,
-          nsapi_team_dimensions{static_cast<uint64_t>(num_iterations)},
-          &functor, &reducer, &m_policy, values, counter, m_result_ptr);
+    nsapi_team_spawn(
+        microtask, team_size,
+        /* memory_size */ 0,
+        nsapi_team_dimensions{static_cast<uint64_t>(num_iterations)}, &functor,
+        &reducer, &m_policy, values, counter, m_result_ptr);
 
-      // TODO: When moving to instance memory, don't deallocate
-      MemorySpace().deallocate(values, scratch_memory_byte_size);
-      MemorySpace().deallocate(counter, sizeof(*counter));
+    // TODO: When moving to instance memory, don't deallocate
+    MemorySpace().deallocate(values, scratch_memory_byte_size);
+    MemorySpace().deallocate(counter, sizeof(*counter));
 
-      // TODO: Fence if !m_result_ptr_on_device - not needed for now as
-      // nsapi_team_spawn is always sync.
-    } else {
-      ValueType* value = reinterpret_cast<ValueType*>(
-          alloca(sizeof(ValueType) * reducer.value_count()));
-      uint32_t counter = 0;
-      microtask(&functor, &reducer, &m_policy, value, &counter, m_result_ptr);
-    }
+    // TODO: Fence if !m_result_ptr_on_device - not needed for now as
+    // nsapi_team_spawn is always sync.
   }
 
  private:
+  #pragma ns mark import_recursive
   static void microtask(const FunctorType* functor, const ReducerType* reducer,
                         const Policy* policy, ValueType* result_arr,
                         uint32_t* counter, ValueType* result_ptr) {

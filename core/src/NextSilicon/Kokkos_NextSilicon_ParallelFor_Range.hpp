@@ -46,7 +46,7 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 
   // FIXME_NEXTSILICON: This pragma should eventually not be necessary.
 #pragma ns mark import_recursive
-// #pragma ns mark boundary
+  // #pragma ns mark boundary
   __attribute__((noinline)) void execute() const {
     // FIXME_NEXTSILICON: Add a dynamic schedule policy check if `typename
     // Policy::schedule_type::type` is Kokkos::Static or Kokkos::Dynamic
@@ -64,22 +64,16 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 
 #else
 
-    if (__nsapi_is_on_cg()) {
-      const auto num_iterations = end - begin;
-      uint32_t team_size        = nsapi_team_get_optimal_size(
-          reinterpret_cast<void*>(microtask), num_iterations);
+    const auto num_iterations = end - begin;
+    uint32_t team_size        = nsapi_team_get_optimal_size(
+        reinterpret_cast<void*>(microtask), num_iterations);
 
-      // FIXME_NEXTSILICON: Change function and policy capture to be more
-      // efficient.
-      nsapi_team_spawn(
-          reinterpret_cast<void*>(microtask), team_size, /* memory_size */ 0,
-          nsapi_team_dimensions{static_cast<uint64_t>(num_iterations)},
-          &m_functor, &m_policy);
-    } else {
-      // FIXME_NEXTSILICON Run microtask on host for training
-      // for now run in serial.
-      microtask(&m_functor, &m_policy);
-    }
+    // FIXME_NEXTSILICON: Change function and policy capture to be more
+    // efficient.
+    nsapi_team_spawn(
+        microtask, team_size, /* memory_size */ 0,
+        nsapi_team_dimensions{static_cast<uint64_t>(num_iterations)},
+        &m_functor, &m_policy);
 #endif
   }
 
@@ -89,10 +83,6 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
   #pragma ns mark import_recursive
   static void microtask(FunctorWrapper const* __restrict functor,
                         const Policy* policy) {
-    // TODO: On the device, the optimizer should turn those calls into
-    // invariants/feeders
-    // On host we're doing a serial for now, so the default values
-    // team_size = 1 and team_index = 0 are valid.
     uint32_t thread_index = nsapi_team_get_thread_index();
     uint32_t team_size    = nsapi_team_get_team_size();
 
