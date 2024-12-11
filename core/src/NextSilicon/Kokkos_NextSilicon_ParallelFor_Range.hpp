@@ -80,9 +80,14 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 #ifndef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 
  private:
-  #pragma ns mark import_recursive
+#pragma ns mark import_recursive
   static void microtask(FunctorWrapper const* __restrict functor,
                         const Policy* policy) {
+    // Communicate to the compiler that the functor is a immutable and thread
+    // invariant for the duration of the microtask.
+    Kokkos::Experimental::Impl::
+        __ns_immutable_thread_invariant_parameter_struct(functor);
+
     uint32_t thread_index = nsapi_team_get_thread_index();
     uint32_t team_size    = nsapi_team_get_team_size();
 

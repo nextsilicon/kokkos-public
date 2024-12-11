@@ -122,10 +122,15 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
   }
 
  private:
-  #pragma ns mark import_recursive
+#pragma ns mark import_recursive
   static void microtask(const FunctorType* functor, const ReducerType* reducer,
                         const Policy* policy, ValueType* result_arr,
                         uint32_t* counter, ValueType* result_ptr) {
+    // Communicate to the compiler that the functor is a immutable and thread
+    // invariant for the duration of the microtask.
+    Kokkos::Experimental::Impl::
+        __ns_immutable_thread_invariant_parameter_struct(functor);
+
     uint32_t thread_index = nsapi_team_get_thread_index();
     uint32_t team_size    = nsapi_team_get_team_size();
 

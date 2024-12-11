@@ -87,3 +87,10 @@ int g_nextsilicon_space_factory_initialized =
     initialize_space_factory<Experimental::NextSilicon>("180_NextSilicon");
 }  // namespace Impl
 }  // Namespace Kokkos
+
+extern "C" void
+Kokkos::Experimental::Impl::__ns_immutable_thread_invariant_parameter_struct(
+    const void* parameter_struct) {
+  // This implementation has been left purposefully empty, as it will be
+  // detected and replaced in the NextSilicon compiler when relevant.
+}
