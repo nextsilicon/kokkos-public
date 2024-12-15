@@ -30,21 +30,14 @@ namespace Kokkos {
 namespace Impl {
 void DeepCopySharedNextSilicon(void* dst, const void* src, size_t n) {
   // Let NextSilicon runtime select the correct implementation.
-  std::memcpy(dst, src, n);
+  nsapi_memory_copy(dst, src, n);
 }
 
 void DeepCopyDeviceNextSilicon(void* dst, const void* src, size_t n) {
 #ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
-  // FIXME_NEXTSILICON fall back to regular memcpy if nsapi not available
   std::memcpy(dst, src, n);
 #else
-  if (n > Kokkos::Experimental::Impl::NextSiliconTraits::BmtUseThreshold) {
-    llns_memory_device_copy_bmt(dst, src, n);
-  } else if (__nsapi_is_on_cg()) {
-    llns_memory_device_copy_rma(dst, src, n);
-  } else {
-    std::memcpy(dst, src, n);
-  }
+  nsapi_memory_copy(dst, src, n);
 #endif
 }
 

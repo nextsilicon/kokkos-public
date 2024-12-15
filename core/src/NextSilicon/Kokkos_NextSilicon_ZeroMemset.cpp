@@ -30,23 +30,10 @@ namespace Kokkos {
 namespace Impl {
 void ZeroMemsetNextSilicon(void* buffer, size_t buffer_size) {
 #ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
-  // FIXME_NEXTSILICON delete once new nsapi are delivered
   std::memset(buffer, 0, buffer_size);
 #else
-  auto fill_alignment =
-      Kokkos::Experimental::Impl::NextSiliconTraits::FillAlignmend;
-  if (buffer_size % fill_alignment != 0 ||
-      reinterpret_cast<uintptr_t>(buffer) % fill_alignment != 0) {
-    // Can't use hardware acceleration as pointers are not aligned correctly.
-    // Valid for all memory space for NextSilicon.
-    std::memset(buffer, 0, buffer_size);
-  } else if (buffer_size >=
-             Kokkos::Experimental::Impl::NextSiliconTraits::BmtUseThreshold) {
-    llns_memory_device_fill_bmt(buffer, 0, buffer_size);
-  } else {
-    uint64_t pattern = 0;
-    llns_memory_device_fill_rma(buffer, pattern, sizeof(pattern), buffer_size);
-  }
+    uint8_t pattern = 0;
+    nsapi_memory_fill(buffer, &pattern, sizeof(pattern), buffer_size);
 #endif
 }
 
