@@ -44,7 +44,17 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
   ParallelFor(Functor const& functor, Policy const& policy)
       : m_functor(functor), m_policy(policy) {}
 
-  __attribute__((noinline)) void execute() const {
+  void execute() const {
+    // Clone the driver before going into the handoff function.
+    // This prevents the stack from getting migrated into device.
+    auto cloned_driver = std::make_unique<
+        Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
+                                  Kokkos::Experimental::NextSilicon>>(*this);
+    cloned_driver->execute_internal();
+  }
+
+ private:
+  __attribute__((noinline)) void execute_internal() const {
     // FIXME_NEXTSILICON: Add a dynamic schedule policy check if `typename
     // Policy::schedule_type::type` is Kokkos::Static or Kokkos::Dynamic
     auto const begin = m_policy.begin();
