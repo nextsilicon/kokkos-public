@@ -79,10 +79,7 @@ class NextSilicon {
   static void impl_static_fence(std::string const& name);
 
   static char const* name() { return "NextSilicon"; }
-  static int concurrency() {
-    // FIXME_NEXTSILICON this is a made up number > 0
-    return 256;
-  }
+  static int concurrency() { return 64 * 1024; /* FIXME_NEXTSILICON - move to nsapi call */ }
   static bool in_parallel() {
     // true if we're inside a handed-off function, false otherwise
     // FIXME_NEXTSILICON in_parallel unimplemented
