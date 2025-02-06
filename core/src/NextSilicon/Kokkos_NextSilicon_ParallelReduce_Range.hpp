@@ -161,9 +161,6 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
     // Last thread to contribute reduction value (i.e counter got to team_size)
     *counter = 0;
 
-    // Runs on a single thread, so running on RISC where single thread
-    // performance is better
-#pragma ns location risc
     for (uint32_t i = 1; i < team_size; ++i) {
       reducer->join(&result_arr[0], &result_arr[i * value_count]);
     }
