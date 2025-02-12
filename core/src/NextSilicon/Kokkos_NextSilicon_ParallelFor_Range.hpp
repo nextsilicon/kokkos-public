@@ -44,9 +44,6 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
   ParallelFor(Functor const& functor, Policy const& policy)
       : m_functor(functor), m_policy(policy) {}
 
-  // FIXME_NEXTSILICON: This pragma should eventually not be necessary.
-#pragma ns mark import_recursive
-  // #pragma ns mark boundary
   __attribute__((noinline)) void execute() const {
     // FIXME_NEXTSILICON: Add a dynamic schedule policy check if `typename
     // Policy::schedule_type::type` is Kokkos::Static or Kokkos::Dynamic
@@ -80,7 +77,6 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
 #ifndef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 
  private:
-#pragma ns mark import_recursive
   static void microtask(FunctorWrapper const* __restrict functor,
                         const Policy* policy) {
     // Communicate to the compiler that the functor is a immutable and thread

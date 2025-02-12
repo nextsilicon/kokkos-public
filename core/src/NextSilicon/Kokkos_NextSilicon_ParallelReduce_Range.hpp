@@ -75,8 +75,6 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
         // access NextSiliconSpace
         m_result_ptr_on_device(false) {}
 
-  // FIXME_NEXTSILICON: This pragma should eventually not be necessary.
-#pragma ns mark import_recursive
   __attribute__((noinline)) void execute() const {
     auto const begin = m_policy.begin();
     auto const end   = m_policy.end();
@@ -122,7 +120,6 @@ class Kokkos::Impl::ParallelReduce<CombinedFunctorReducerType,
   }
 
  private:
-#pragma ns mark import_recursive
   static void microtask(const FunctorType* functor, const ReducerType* reducer,
                         const Policy* policy, ValueType* result_arr,
                         uint32_t* counter, ValueType* result_ptr) {
