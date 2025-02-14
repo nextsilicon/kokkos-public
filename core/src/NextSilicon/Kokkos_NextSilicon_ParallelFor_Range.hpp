@@ -20,6 +20,7 @@
 #include <nsapi/intrinsics.h>
 #if !defined(KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL)
 #include <nsapi/parallelism.h>
+#include <nsapi/parallelism_internal.hpp>
 #endif
 
 #include <NextSilicon/Kokkos_NextSilicon.hpp>
@@ -33,6 +34,7 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
   using WorkTag   = typename Policy::work_tag;
   using WorkRange = typename Policy::WorkRange;
   using Member    = typename Policy::member_type;
+  using IndexType = typename Policy::index_type;
 
   using FunctorWrapper =
       Kokkos::Experimental::Impl::FunctorAdapter<Functor, Policy>;
@@ -57,56 +59,42 @@ class Kokkos::Impl::ParallelFor<Functor, Kokkos::RangePolicy<Traits...>,
   __attribute__((noinline)) void execute_internal() const {
     // FIXME_NEXTSILICON: Add a dynamic schedule policy check if `typename
     // Policy::schedule_type::type` is Kokkos::Static or Kokkos::Dynamic
-    auto const begin = m_policy.begin();
-    auto const end   = m_policy.end();
+    const IndexType begin = m_policy.begin();
+    const IndexType end   = m_policy.end();
 
     if (end <= begin) return;
 
 #ifdef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 
 #pragma omp parallel for
-    for (auto i = begin; i < end; ++i) {
+    for (IndexType i = begin; i < end; ++i) {
       m_functor(i);
     }
 
 #else
 
-    const auto num_iterations = end - begin;
-    uint32_t team_size        = nsapi_team_get_optimal_size(
-        reinterpret_cast<void*>(microtask), num_iterations);
+    const IndexType chunk_size = m_policy.chunk_size();
+    nsapi::experimental::parallel_for(begin, end, chunk_size, parallel_function,
+                                      &m_functor);
 
-    // FIXME_NEXTSILICON: Change function and policy capture to be more
-    // efficient.
-    nsapi_team_spawn(
-        microtask, team_size, /* memory_size */ 0,
-        nsapi_team_dimensions{static_cast<uint64_t>(num_iterations)},
-        &m_functor, &m_policy);
 #endif
   }
 
 #ifndef KOKKOS_ENABLE_IMPL_NSAPI_UNAVAIL
 
  private:
-  static void microtask(FunctorWrapper const* __restrict functor,
-                        const Policy* policy) {
+  /// Executes a single parallel iteration `index` for `functor`.
+  static void parallel_function(IndexType index,
+                                FunctorWrapper const* __restrict functor) {
     // Communicate to the compiler that the functor is a immutable and thread
     // invariant for the duration of the microtask.
     Kokkos::Experimental::Impl::
         __ns_immutable_thread_invariant_parameter_struct(functor);
-
-    uint32_t thread_index = nsapi_team_get_thread_index();
-    uint32_t team_size    = nsapi_team_get_team_size();
-
-    WorkRange range(*policy, thread_index, team_size);
-    const auto ibeg = range.begin();
-    const auto iend = range.end();
-
-    for (auto i = ibeg; i < iend; ++i) {
-      // Invokes the functor itself. Expected to inline (if compiler visible)
-      // the functor body while passing the extra this pointer.
-      (*functor)(i);
-    }
+    // Invokes the functor itself. Expected to inline (if compiler visible) the
+    // functor body while passing the extra this pointer.
+    (*functor)(index);
   }
+
 #endif
 };
 
