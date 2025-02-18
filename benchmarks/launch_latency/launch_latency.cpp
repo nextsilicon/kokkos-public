@@ -146,6 +146,7 @@ void run(int N, int M, int K, const Opts& opts) {
     time_fence = timer.seconds();
   }
 
+#ifndef KOKKOS_ENABLE_NEXTSILICON
   if (opts.par_reduce) {
     // warmup
     for (int i = 0; i < 4; ++i) {
@@ -194,6 +195,7 @@ void run(int N, int M, int K, const Opts& opts) {
     Kokkos::fence();
     timer.reset();
   }
+#endif  // KOKKOS_ENABLE_NEXTSILICON
 
   const double x = 1.e6 / M;
   printf("%i %i %i %i", N, V, K, M);
@@ -268,6 +270,13 @@ int main(int argc, char* argv[]) {
         Kokkos::abort(ss.str().c_str());
       }
     }
+
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+    if (opts.par_reduce_view || opts.par_reduce) {
+      Kokkos::abort(
+          "Nextsilicon backend support only parallel_for in this benchmark");
+    }
+#endif
 
     printf("N V K M time_no_fence time_fence (time_no_fence_fenced)\n");
 
