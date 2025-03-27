@@ -139,6 +139,7 @@ kokkos_enable_option(IMPL_HPX_ASYNC_DISPATCH ${HPX_ASYNC_DISPATCH_DEFAULT} "Whet
 kokkos_enable_option(IMPL_NSAPI_UNAVAIL OFF "Whether new NSAPI version is available or not")
 kokkos_enable_option(IMPL_NSAPI_ADD_TELEM_REGIONS OFF "Whether to wrap NextSilicon instance in telem regions")
 kokkos_enable_option(IMPL_NEXTSILICON_UNIFIED_MEMORY OFF "Whether to use NextSiliconSharedSpace for NextSilicon by default")
+kokkos_enable_option(IMPL_NEXTSILICON_DISTRIBUTE_MEMORY OFF "Whether to use NextSilicon distributed migration by default")
 
 kokkos_enable_option(UNSUPPORTED_ARCHS OFF "Whether to allow architectures in backends Kokkos doesn't optimize for")
 
@@ -189,6 +190,7 @@ check_device_specific_options(
   IMPL_NSAPI_UNAVAIL
   IMPL_NSAPI_ADD_TELEM_REGIONS
   IMPL_NEXTSILICON_UNIFIED_MEMORY
+  IMPL_NEXTSILICON_DISTRIBUTE_MEMORY
 )
 
 # Needed due to change from deprecated name to new header define name
