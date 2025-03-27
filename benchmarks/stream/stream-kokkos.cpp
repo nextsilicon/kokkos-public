@@ -21,11 +21,12 @@
 
 #include <sys/time.h>
 
-#define STREAM_ARRAY_SIZE 100000000
+#define STREAM_ARRAY_SIZE (1ULL << 31)
 #define STREAM_NTIMES 20
 
 #define HLINE "-------------------------------------------------------------\n"
 
+typedef double __attribute__((__vector_size__((sizeof(double) * 8)))) vector_t;
 using StreamDeviceArray =
     Kokkos::View<double*, Kokkos::MemoryTraits<Kokkos::Restrict>>;
 using StreamHostArray = typename StreamDeviceArray::HostMirror;
@@ -35,16 +36,21 @@ using Policy      = Kokkos::RangePolicy<Kokkos::IndexType<StreamIndex>>;
 
 void perform_set(StreamDeviceArray& a, const double scalar) {
   Kokkos::parallel_for(
-      "set", Policy(0, a.extent(0)),
-      KOKKOS_LAMBDA(const StreamIndex i) { a[i] = scalar; });
+      "set", Policy(0, a.extent(0) / 8), KOKKOS_LAMBDA(const StreamIndex i) {
+        vector_t* va = (vector_t*)&a[i * 8];
+        *va = {scalar, scalar, scalar, scalar, scalar, scalar, scalar, scalar};
+      });
 
   Kokkos::fence();
 }
 
 void perform_copy(StreamDeviceArray& a, StreamDeviceArray& b) {
   Kokkos::parallel_for(
-      "copy", Policy(0, a.extent(0)),
-      KOKKOS_LAMBDA(const StreamIndex i) { b[i] = a[i]; });
+      "copy", Policy(0, a.extent(0) / 8), KOKKOS_LAMBDA(const StreamIndex i) {
+        vector_t* va = (vector_t*)&a[i * 8];
+        vector_t* vb = (vector_t*)&b[i * 8];
+        *va          = *vb;
+      });
 
   Kokkos::fence();
 }
@@ -52,8 +58,11 @@ void perform_copy(StreamDeviceArray& a, StreamDeviceArray& b) {
 void perform_scale(StreamDeviceArray& b, StreamDeviceArray& c,
                    const double scalar) {
   Kokkos::parallel_for(
-      "scale", Policy(0, b.extent(0)),
-      KOKKOS_LAMBDA(const StreamIndex i) { b[i] = scalar * c[i]; });
+      "scale", Policy(0, b.extent(0) / 8), KOKKOS_LAMBDA(const StreamIndex i) {
+        vector_t* vb = (vector_t*)&b[i * 8];
+        vector_t* vc = (vector_t*)&c[i * 8];
+        *vb          = scalar * *vc;
+      });
 
   Kokkos::fence();
 }
@@ -61,8 +70,12 @@ void perform_scale(StreamDeviceArray& b, StreamDeviceArray& c,
 void perform_add(StreamDeviceArray& a, StreamDeviceArray& b,
                  StreamDeviceArray& c) {
   Kokkos::parallel_for(
-      "add", Policy(0, a.extent(0)),
-      KOKKOS_LAMBDA(const StreamIndex i) { c[i] = a[i] + b[i]; });
+      "add", Policy(0, a.extent(0) / 8), KOKKOS_LAMBDA(const StreamIndex i) {
+        vector_t* va = (vector_t*)&a[i * 8];
+        vector_t* vb = (vector_t*)&b[i * 8];
+        vector_t* vc = (vector_t*)&c[i * 8];
+        *vc          = *va + *vb;
+      });
 
   Kokkos::fence();
 }
@@ -70,8 +83,12 @@ void perform_add(StreamDeviceArray& a, StreamDeviceArray& b,
 void perform_triad(StreamDeviceArray& a, StreamDeviceArray& b,
                    StreamDeviceArray& c, const double scalar) {
   Kokkos::parallel_for(
-      "triad", Policy(0, a.extent(0)),
-      KOKKOS_LAMBDA(const StreamIndex i) { a[i] = b[i] + scalar * c[i]; });
+      "triad", Policy(0, a.extent(0) / 8), KOKKOS_LAMBDA(const StreamIndex i) {
+        vector_t* va = (vector_t*)&a[i * 8];
+        vector_t* vb = (vector_t*)&b[i * 8];
+        vector_t* vc = (vector_t*)&c[i * 8];
+        *va          = *vb + scalar * *vc;
+      });
 
   Kokkos::fence();
 }
