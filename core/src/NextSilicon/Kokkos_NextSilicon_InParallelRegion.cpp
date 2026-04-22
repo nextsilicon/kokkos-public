@@ -2,39 +2,33 @@
 // SPDX-FileCopyrightText: Copyright Contributors to the Kokkos project
 
 #include <NextSilicon/Kokkos_NextSilicon_InParallelRegion.hpp>
-#include <Kokkos_Abort.hpp>
+#include <Kokkos_Assert.hpp>
 #include <Kokkos_Atomic.hpp>
 #include <nextapi/memory.h>
 
 namespace Kokkos::Impl {
-/*static*/ NextSiliconParallelRegionScopeGuard::HostPinnedBool
-    NextSiliconParallelRegionScopeGuard::s_is_in_parallel_region = false;
+/*static*/ NextSiliconParallelRegionScopeGuard::HostPinnedData
+    NextSiliconParallelRegionScopeGuard::s_data = false;
 
-NextSiliconParallelRegionScopeGuard::HostPinnedBool::HostPinnedBool(
-    const bool &b)
-    : b_(b) {
+NextSiliconParallelRegionScopeGuard::HostPinnedData::HostPinnedData(
+    const bool is_in_parallel_region)
+    : is_in_parallel_region_(is_in_parallel_region) {
   // Upon construction, pin this variable to host memory to prevent it from
   // being migrated to device.
   nextapi_mem_migrate(this, sizeof(*this), NEXTAPI_PAGE_LOC_HOST, true);
 }
 
-NextSiliconParallelRegionScopeGuard::NextSiliconParallelRegionScopeGuard() {
-  // FIXME_NEXTSILICON: Currently parallel dispatch from multiple host threads
-  // is not supported. Remove this atomic and assert when when support is added.
-  bool old = Kokkos::atomic_exchange(
-      &static_cast<bool &>(s_is_in_parallel_region), true);
-  if (old != false) {
-    Kokkos::abort("Already in a parallel region");
-  }
+NextSiliconParallelRegionScopeGuard::NextSiliconParallelRegionScopeGuard()
+    : device_lock_(s_data.mtx_) {
+  KOKKOS_ASSERT(s_data.is_in_parallel_region_ == false &&
+                "Already in a parallel region");
+  s_data.is_in_parallel_region_ = true;
 }
+
 NextSiliconParallelRegionScopeGuard::~NextSiliconParallelRegionScopeGuard() {
-  // FIXME_NEXTSILICON: Currently parallel dispatch from multiple host threads
-  // is not supported. Remove this atomic and assert when when support is added.
-  bool old = Kokkos::atomic_exchange(
-      &static_cast<bool &>(s_is_in_parallel_region), false);
-  if (old != true) {
-    Kokkos::abort("Not in a parallel region");
-  }
+  KOKKOS_ASSERT(s_data.is_in_parallel_region_ == true &&
+                "Not in a parallel region");
+  s_data.is_in_parallel_region_ = false;
 }
 
 }  // namespace Kokkos::Impl
