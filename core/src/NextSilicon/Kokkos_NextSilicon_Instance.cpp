@@ -6,8 +6,7 @@
 #endif
 
 #include <Kokkos_Core.hpp>
-
-#include <impl/Kokkos_Profiling.hpp>
+#include <mutex>
 #include <ostream>
 #include <cstdint>
 #include <cstddef>
@@ -49,6 +48,16 @@ std::byte *NextSiliconInternal::resize_functor_buffer(size_t requested) {
   requested = std::max(requested, MIN_FUNCTOR_BUFFER_SIZE);
 
   return functorBuffer_.ensure("functor heap buffer", requested);
+}
+
+std::optional<std::lock_guard<std::mutex>>
+Kokkos::Experimental::Impl::NextSiliconInternal::lock_device() {
+  KOKKOS_IF_ON_HOST({
+    return std::optional<std::lock_guard<std::mutex>>(std::in_place,
+                                                      this->device_mutex_);
+  })
+  KOKKOS_IF_ON_DEVICE({ return std::nullopt; })
+  KOKKOS_IMPL_UNREACHABLE();
 }
 
 }  // namespace Kokkos::Experimental::Impl

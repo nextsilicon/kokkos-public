@@ -9,7 +9,7 @@
 
 namespace Kokkos::Impl {
 
-static constexpr int PAGE_SIZE = 4096;
+inline constexpr int PAGE_SIZE = 4096;
 
 // This struct is aligned to 4096 bytes (page size) to work around
 // issues with NextSilicon page migration. It can be pinned to the host
@@ -23,6 +23,8 @@ struct alignas(PAGE_SIZE) PageAlignedData {
   operator const T&() const { return data; }
 
   template <typename... Args>
+    requires(!(sizeof...(Args) == 1 &&
+               (std::is_same_v<std::decay_t<Args>, PageAlignedData> && ...)))
   PageAlignedData(Args&&... args) : data{std::forward<Args>(args)...} {
     if constexpr (PinToHost) {
       // Pin this variable to host memory to prevent migration to device.

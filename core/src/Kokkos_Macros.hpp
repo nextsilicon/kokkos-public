@@ -506,8 +506,7 @@
 #endif
 
 #ifdef KOKKOS_ENABLE_NEXTSILICON
-#include <nextapi/intrinsics.h>
-#include <NextSilicon/Kokkos_NextSilicon_InParallelRegion.hpp>
+#include <NextSilicon/Kokkos_NextSilicon_ThreadSpaceGuard.hpp>
 
 // For grid execution, the optimizer knows __next_is_in_handed_of_code() is
 // always true, in_parallel_region() will short-circuit, and not actually be
@@ -516,10 +515,9 @@
 // During host execution the macro will check if we are in a parallel region by
 // checking the flag and execute CODE only if we are IN a parallel region
 // - hence we are on device!
-#define KOKKOS_IF_ON_DEVICE(CODE)                                \
-  if (__next_is_in_handed_off_code() ||                          \
-      Kokkos::Impl::NextSiliconParallelRegionScopeGuard::in()) { \
-    KOKKOS_IMPL_STRIP_PARENS(CODE)                               \
+#define KOKKOS_IF_ON_DEVICE(CODE)                                    \
+  if (::Kokkos::Impl::NextSiliconThreadSpaceGuard::is_on_device()) { \
+    KOKKOS_IMPL_STRIP_PARENS(CODE)                                   \
   }
 
 // For grid execution, the optimizer knows __next_is_in_handed_of_code() is
@@ -530,10 +528,9 @@
 // For hosts execution macro will check if we are in a parallel region by
 // checking the flag and execute CODE only if we are NOT IN a parallel
 // region - we are on host!
-#define KOKKOS_IF_ON_HOST(CODE)                                   \
-  if (!__next_is_in_handed_off_code() &&                          \
-      !Kokkos::Impl::NextSiliconParallelRegionScopeGuard::in()) { \
-    KOKKOS_IMPL_STRIP_PARENS(CODE)                                \
+#define KOKKOS_IF_ON_HOST(CODE)                                       \
+  if (!::Kokkos::Impl::NextSiliconThreadSpaceGuard::is_on_device()) { \
+    KOKKOS_IMPL_STRIP_PARENS(CODE)                                    \
   }
 #endif
 
