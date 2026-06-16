@@ -57,11 +57,23 @@ class [[nodiscard]] NextSiliconThreadSpaceGuard {
  private:
   static thread_local PageAlignedData<bool, true> thread_is_on_device;
 
+  // Containment for the TLS read. If `thread_is_on_device > 0` were inlined
+  // into is_on_device()'s callers, the underlying `llvm.threadlocal.address`
+  // intrinsic (declared speculatable) could be hoisted past the `||`
+  // short-circuit in is_on_device(), breaking semantics. Keeping the read
+  // behind a non-inlined wrapper makes the call opaque at every use site,
+  // so the speculation never reaches the load. `weak` is what prevents
+  // inlining (its primary side effect is that the linker may interpose the
+  // body, so the optimizer must treat it as opaque).
+  static __attribute__((weak)) bool host_thread_is_on_device() {
+    return thread_is_on_device;
+  }
+
  public:
   explicit NextSiliconThreadSpaceGuard() noexcept;
   ~NextSiliconThreadSpaceGuard() noexcept;
 
-  static __attribute__((always_inline)) bool is_on_device() noexcept;
+  static __attribute__((weak)) bool is_on_device() noexcept;
 
   // Copy and move operations are deleted to emulate semantics of
   // std::lock_guard.
@@ -73,11 +85,11 @@ class [[nodiscard]] NextSiliconThreadSpaceGuard {
       delete;
 };
 
-inline __attribute__((always_inline)) bool
+inline __attribute__((weak)) bool
 NextSiliconThreadSpaceGuard::is_on_device() noexcept {
   // We are either really handed off to the device, or should pretend to be
   // (for training mode).
-  return __next_is_in_handed_off_code() || thread_is_on_device;
+  return __next_is_in_handed_off_code() || host_thread_is_on_device();
 }
 
 }  // namespace Kokkos::Impl
