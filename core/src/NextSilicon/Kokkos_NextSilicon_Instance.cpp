@@ -50,14 +50,11 @@ std::byte *NextSiliconInternal::resize_functor_buffer(size_t requested) {
   return functorBuffer_.ensure("functor heap buffer", requested);
 }
 
-std::optional<std::lock_guard<std::mutex>>
+std::lock_guard<std::mutex>
 Kokkos::Experimental::Impl::NextSiliconInternal::lock_device() {
-  KOKKOS_IF_ON_HOST({
-    return std::optional<std::lock_guard<std::mutex>>(std::in_place,
-                                                      this->device_mutex_);
-  })
-  KOKKOS_IF_ON_DEVICE({ return std::nullopt; })
-  KOKKOS_IMPL_UNREACHABLE();
+  KOKKOS_IF_ON_DEVICE(
+      (KOKKOS_ASSERT(false && "lock_device should never be called on device");))
+  return std::lock_guard<std::mutex>(this->device_mutex_);
 }
 
 }  // namespace Kokkos::Experimental::Impl

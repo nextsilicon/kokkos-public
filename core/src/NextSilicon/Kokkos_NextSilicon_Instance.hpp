@@ -10,7 +10,6 @@
 #include <cstddef>
 #include <iosfwd>
 #include <mutex>
-#include <optional>
 #include <string>
 #include <memory>
 
@@ -53,7 +52,7 @@ class NextSiliconInternal {
 
   uint32_t instance_id() const noexcept;
 
-  [[nodiscard]] std::optional<std::lock_guard<std::mutex>> lock_device();
+  [[nodiscard]] std::lock_guard<std::mutex> lock_device();
 };
 
 }  // namespace Kokkos::Experimental::Impl
