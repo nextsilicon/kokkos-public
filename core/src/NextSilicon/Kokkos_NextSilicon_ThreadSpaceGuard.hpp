@@ -55,7 +55,8 @@ namespace Kokkos::Impl {
 // without touching any thread_local flags.
 class [[nodiscard]] NextSiliconThreadSpaceGuard {
  private:
-  static thread_local PageAlignedData<bool, true> thread_is_on_device;
+  static thread_local PageAlignedData<bool, PageLocation::Host>
+      thread_is_on_device;
 
   // Containment for the TLS read. If `thread_is_on_device > 0` were inlined
   // into is_on_device()'s callers, the underlying `llvm.threadlocal.address`
