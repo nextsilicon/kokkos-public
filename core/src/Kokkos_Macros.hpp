@@ -408,6 +408,15 @@
 // Only available in C++23
 // FIXME_HIP doesn't support std::unreachable in device code
 // FIXME_CUDA doesn't support std::unreachable in device code
+//
+// When this follows a KOKKOS_IF_ON_HOST/KOKKOS_IF_ON_DEVICE pair, *every* arm
+// must exit -- return or call a [[noreturn]] function. For most backends the
+// two macros are selected by the preprocessor, so exactly one arm exists and
+// the trailing unreachable is harmless dead code. For backends where they
+// expand to runtime `if`s (NextSilicon, OpenACC), an arm that falls through
+// leaves control reaching the unreachable, which is undefined behavior: the
+// optimizer resolves it by assuming the condition always selects the other
+// arm and deletes the branch entirely.
 #if defined(__cpp_lib_unreachable) && !defined(KOKKOS_ENABLE_HIP) && \
     !defined(KOKKOS_ENABLE_CUDA)
 #include <utility>
