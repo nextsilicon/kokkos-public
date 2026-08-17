@@ -544,7 +544,7 @@ jobs:
         # FIXME_NEXTSILICON: disable core dumps for now
         run: |
           ulimit -c 0
-          ctest -V --timeout 1800
+          ctest -V --timeout 10800
 
       - name: test_kokkos
         working-directory: kokkos/build
@@ -559,7 +559,7 @@ jobs:
         # so on the SNL CI runner, we'd expect around 2.5 hours.
         run: |
           ulimit -c 0
-          ctest -V -E 'NextSilicon1A' --timeout 1800
+          ctest -V --timeout 10800
 
   SNL_Required_Checks:
     if: always()
