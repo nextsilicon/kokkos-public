@@ -52,6 +52,7 @@ Date Range: present -- 2025-08-11
 - Adi Nissim; NextSilicon; adi.nissim@nextsilicon.com
 - Christian Ulmann; NextSilicon; christian.ulmann@nextsilicon.com
 - Efi Plotkin; NextSilicon; efi.plotkin@nextsilicon.com
+- Filip Parag; NextSilicon; filip.parag@nextsilicon.com
 - Guy Malinovitch; NextSilicon; guy.malinovitch@nextsilicon.com
 - Ilia Sixtel; NextSilicon; ilia.sixtel@nextsilicon.com
 - Irina Lipov; NextSilicon; irina.lipov@nextsilicon.com
