@@ -627,13 +627,13 @@ KOKKOS_IMPL_MATH_UNARY_FUNCTION(cos)
 // double-precision `tan`.
 KOKKOS_INLINE_FUNCTION double tan(double x) { return std::tan(x); }
 KOKKOS_INLINE_FUNCTION float tan(float x) {
-  return static_cast<float>(std::tan(static_cast<double>(x)));
+  return std::tan(static_cast<double>(x));
 }
 KOKKOS_INLINE_FUNCTION float tanf(float x) {
-  return static_cast<float>(std::tan(static_cast<double>(x)));
+  return std::tan(static_cast<double>(x));
 }
-KOKKOS_INLINE_FUNCTION long double tan(long double x) { return std::tan(x); }
-KOKKOS_INLINE_FUNCTION long double tanl(long double x) { return std::tan(x); }
+inline long double tan(long double x) { return std::tan(x); }
+inline long double tanl(long double x) { return std::tan(x); }
 template <class T>
 KOKKOS_INLINE_FUNCTION std::enable_if_t<std::is_integral_v<T>, double> tan(
     T x) {
@@ -649,13 +649,13 @@ KOKKOS_IMPL_MATH_UNARY_FUNCTION(acos)
 // double-precision `atan`.
 KOKKOS_INLINE_FUNCTION double atan(double x) { return std::atan(x); }
 KOKKOS_INLINE_FUNCTION float atan(float x) {
-  return static_cast<float>(std::atan(static_cast<double>(x)));
+  return std::atan(static_cast<double>(x));
 }
 KOKKOS_INLINE_FUNCTION float atanf(float x) {
-  return static_cast<float>(std::atan(static_cast<double>(x)));
+  return std::atan(static_cast<double>(x));
 }
-KOKKOS_INLINE_FUNCTION long double atan(long double x) { return std::atan(x); }
-KOKKOS_INLINE_FUNCTION long double atanl(long double x) { return std::atan(x); }
+inline long double atan(long double x) { return std::atan(x); }
+inline long double atanl(long double x) { return std::atan(x); }
 template <class T>
 KOKKOS_INLINE_FUNCTION std::enable_if_t<std::is_integral_v<T>, double> atan(
     T x) {

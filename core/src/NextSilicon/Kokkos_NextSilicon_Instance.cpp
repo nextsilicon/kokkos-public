@@ -8,7 +8,6 @@
 #include <Kokkos_Core.hpp>
 #include <impl/Kokkos_Profiling.hpp>
 #include <mutex>
-#include <Kokkos_Macros.hpp>
 #include <ostream>
 #include <cstdint>
 #include <cstddef>
@@ -53,7 +52,7 @@ std::byte *NextSiliconInternal::resize_functor_buffer(size_t requested) {
 }
 
 std::byte *NextSiliconInternal::resize_league_scratch_buffer(size_t requested) {
-  constexpr static size_t MIN_LEAGUE_SCRATCH_BUFFER_SIZE =
+  constexpr size_t MIN_LEAGUE_SCRATCH_BUFFER_SIZE =
       4 * 1024 * 1024;  // 4 MB
   requested = std::max(requested, MIN_LEAGUE_SCRATCH_BUFFER_SIZE);
 
