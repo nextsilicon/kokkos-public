@@ -1037,7 +1037,25 @@ void test_bhalf_operators() {
   }
 }
 
-TEST(TEST_CATEGORY, half_operators) { test_half_operators(); }
-TEST(TEST_CATEGORY, bhalf_operators) { test_bhalf_operators(); }
+TEST(TEST_CATEGORY, half_operators) {
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+  // FIXME_NEXTSILICON: half-precision support is incomplete on NextSilicon
+  if constexpr (std::is_same_v<TEST_EXECSPACE,
+                               Kokkos::Experimental::NextSilicon>) {
+    GTEST_SKIP() << "half-precision support is incomplete on NextSilicon";
+  }
+#endif
+  test_half_operators();
+}
+TEST(TEST_CATEGORY, bhalf_operators) {
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+  // FIXME_NEXTSILICON: half-precision support is incomplete on NextSilicon
+  if constexpr (std::is_same_v<TEST_EXECSPACE,
+                               Kokkos::Experimental::NextSilicon>) {
+    GTEST_SKIP() << "half-precision support is incomplete on NextSilicon";
+  }
+#endif
+  test_bhalf_operators();
+}
 }  // namespace Test
 #endif  // TESTHALFOPERATOR_HPP_
