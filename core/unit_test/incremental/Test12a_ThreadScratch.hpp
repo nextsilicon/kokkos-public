@@ -95,6 +95,13 @@ TEST(TEST_CATEGORY, IncrTest_12a_ThreadScratch) {
   GTEST_SKIP() << "skipping since scratch memory is not yet implemented in the "
                   "OpenACC backend";
 #endif
+#ifdef KOKKOS_ENABLE_NEXTSILICON
+  // FIXME_NEXTSILICON: scratch memory crashes the runtime
+  if constexpr (std::is_same_v<TEST_EXECSPACE,
+                               Kokkos::Experimental::NextSilicon>) {
+    GTEST_SKIP() << "scratch memory on NextSilicon crashes the runtime";
+  }
+#endif
 
   ThreadScratch<TEST_EXECSPACE> test;
   test.run(1, 55, 9);

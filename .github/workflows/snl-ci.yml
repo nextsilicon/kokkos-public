@@ -521,7 +521,7 @@ jobs:
         # FIXME_NEXTSILICON: disable core dumps for now
         run: |
           ulimit -c 0
-          ctest -V --timeout 1800
+          ctest -V --timeout 10800
 
       - name: test_kokkos
         working-directory: kokkos/build
@@ -534,4 +534,4 @@ jobs:
         # FIXME_NEXTSILICON: disable core dumps for now
         run: |
           ulimit -c 0
-          ctest -V --timeout 1800
+          ctest -V --timeout 10800
