@@ -5,6 +5,7 @@
 #define KOKKOS_TEST_SERIAL_HPP
 
 #include <gtest/gtest.h>
+#include <NextSilicon/Kokkos_NextSilicon_DeathTest.hpp>
 
 #define TEST_CATEGORY serial
 #define TEST_CATEGORY_NUMBER 0
