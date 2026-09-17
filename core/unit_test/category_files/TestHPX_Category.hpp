@@ -5,6 +5,7 @@
 #define KOKKOS_TEST_HPX_HPP
 
 #include <gtest/gtest.h>
+#include <NextSilicon/Kokkos_NextSilicon_DeathTest.hpp>
 
 #define TEST_CATEGORY hpx
 #define TEST_CATEGORY_NUMBER 3

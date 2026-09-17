@@ -5,6 +5,7 @@
 #define KOKKOS_TEST_NEXTSILICON_HPP
 
 #include <gtest/gtest.h>
+#include <NextSilicon/Kokkos_NextSilicon_DeathTest.hpp>
 
 #define TEST_CATEGORY nextsilicon
 #define TEST_CATEGORY_NUMBER 9
